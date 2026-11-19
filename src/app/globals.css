@@ -471,3 +471,32 @@ select.field option {
   font-size: 0.95em;
   line-height: 1.7;
 }
+
+/* WYSIWYG editor (admin) */
+.rte .ProseMirror {
+  outline: none;
+}
+.rte .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--dim);
+}
+.rte .ProseMirror img {
+  display: block;
+  margin: 1rem auto;
+  max-height: 24rem;
+}
+.rte .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+}
+.rte .ProseMirror table {
+  table-layout: fixed;
+}
+.rte .ProseMirror .selectedCell {
+  background: var(--accent-soft);
+}
+.rte .ProseMirror a {
+  cursor: text;
+}

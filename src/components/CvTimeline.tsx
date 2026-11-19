@@ -6,7 +6,7 @@ import { fmtPeriod } from "@/lib/format";
 import { ChevronDown } from "./icons";
 
 /** Experience rows arrive with Markdown pre-rendered on the server. */
-export type CvRole = Omit<Experience, "summary"> & { summaryNode: React.ReactNode };
+export type CvRole = Omit<Experience, "summary"> & { summaryNode: React.ReactNode; highlightNodes: React.ReactNode[] };
 
 export function CvTimeline({ roles }: { roles: CvRole[] }) {
   const tags = useMemo(() => ["All", ...Array.from(new Set(roles.map((r) => r.domainTag)))], [roles]);
@@ -91,7 +91,7 @@ export function CvTimeline({ roles }: { roles: CvRole[] }) {
                       hidden={!isOpen}
                       className="cv-details mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted marker:text-dim"
                     >
-                      {r.highlights.map((h, i) => (
+                      {r.highlightNodes.map((h, i) => (
                         <li key={i}>{h}</li>
                       ))}
                     </ul>

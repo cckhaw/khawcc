@@ -378,9 +378,10 @@ export const seedParts: BookPart[] = [
 const PART_OF: Record<string, number> = {
   Preface: 1, "1": 1, "2": 1, "3": 1, "4": 1, "5": 1, "5.1": 1,
   "6": 2, "6.1": 2, "7": 2, "8": 2, "9": 2, "9.1": 2,
-  "10": 3, Annex: 3,
+  "10": 2, "11": 3, Annex: 3,
 };
 const PUBLISHED = new Set(Object.keys(PART_OF)); // all manuscript chapters are published
+const WORKING_DRAFT = new Set(["10"]); // published, flagged "Work in progress"
 const RELATED: Record<string, string[]> = {
   "8": ["plansifu"],
   "9": ["meridian"],
@@ -395,7 +396,7 @@ export const seedChapters: BookChapter[] = (chaptersJson as RawChapter[]).map((c
   slug: c.slug,
   title: c.title,
   subtitle: "",
-  status: PUBLISHED.has(c.label) ? ("published" as const) : ("draft" as const),
+  status: WORKING_DRAFT.has(c.label) ? ("wip_published" as const) : PUBLISHED.has(c.label) ? ("published" as const) : ("draft" as const),
   summary: c.summary,
   contentMarkdown: c.content,
   readingTimeMinutes: readingTime(c.content),

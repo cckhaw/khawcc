@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ApacMap } from "@/components/ApacMap";
 import { ChapterCard } from "@/components/ChapterCard";
 import { ExperienceSnippet } from "@/components/ExperienceRow";
 import { SocialLinks } from "@/components/Footer";
@@ -95,7 +96,28 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ---------------- Selected work across APAC ---------------- */}
+      <section className="mx-auto mt-24 max-w-6xl px-5 sm:px-8" aria-labelledby="apac-title">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div className="max-w-2xl">
+            <p className="eyebrow">Selected work</p>
+            <h2 id="apac-title" className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+              Telecom &amp; digital transformation across APAC
+            </h2>
+            <p className="mt-3 leading-relaxed text-muted">
+              From Wi-Fi roaming hubs and policy managers to prepaid migrations and MVNE platforms, plus the Maxis BSS
+              transformation I&rsquo;m leading now. Hover a project to find it on the map.
+            </p>
+          </div>
+          <a href="/img/apac-transformation.png" download className="no-print text-sm text-muted hover:text-fg">
+            Download as image ↓
+          </a>
+        </div>
+        <ApacMap />
+      </section>
+
       {/* ---------------- About ---------------- */}
+
       <section className="mx-auto mt-24 grid max-w-6xl gap-10 px-5 sm:px-8 lg:grid-cols-[1.2fr_1fr]">
         <div>
           <SectionHeader eyebrow="About" title="Builder of systems, leader of people" />

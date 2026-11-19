@@ -1,0 +1,83 @@
+name: Deploy to Vercel (production only)
+
+# Production deploys only: no preview builds. Triggered by pushes to main.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-production
+  cancel-in-progress: false
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint && npm run typecheck
+
+      - name: Pull Vercel production environment
+        run: npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build
+        run: npx vercel@latest build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy to production
+        id: deploy
+        run: |
+          url=$(npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed: $url"
+
+      - name: Wait until the new deployment is live (READY)
+        id: live
+        run: |
+          host=$(echo "${{ steps.deploy.outputs.url }}" | sed -E 's#https?://##')
+          for i in $(seq 1 60); do
+            d=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v13/deployments/$host?teamId=$VERCEL_TEAM_ID")
+            state=$(echo "$d" | jq -r .readyState)
+            echo "readyState=$state"
+            if [ "$state" = "READY" ]; then
+              echo "id=$(echo "$d" | jq -r .id)" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            case "$state" in ERROR|CANCELED) echo "Deployment failed"; exit 1;; esac
+            sleep 10
+          done
+          echo "Timed out waiting for deployment"; exit 1
+
+      - name: Delete all previous deployments (keep only the latest)
+        run: |
+          keep="${{ steps.live.outputs.id }}"
+          echo "Keeping $keep"
+          until_param=""
+          ids=""
+          while :; do
+            page=$(curl -fsS -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_TEAM_ID&limit=100$until_param")
+            ids="$ids $(echo "$page" | jq -r '.deployments[].uid')"
+            next=$(echo "$page" | jq -r '.pagination.next // empty')
+            [ -z "$next" ] && break
+            until_param="&until=$next"
+          done
+          for id in $ids; do
+            [ "$id" = "$keep" ] && continue
+            code=$(curl -sS -o /tmp/del.json -w '%{http_code}' -X DELETE \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v13/deployments/$id?teamId=$VERCEL_TEAM_ID")
+            echo "delete $id -> $code"
+          done

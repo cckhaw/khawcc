@@ -38,6 +38,11 @@ jobs:
           if [ -z "${DATABASE_URL:-}" ]; then
             echo "DATABASE_URL is missing from the Vercel Production environment (connect Neon to the project)."; exit 1
           fi
+          # Safe diagnostics (never prints the value itself): scheme, length, odd characters.
+          for v in DATABASE_URL DATABASE_URL_UNPOOLED; do
+            val="${!v:-}"
+            echo "$v: length=${#val} scheme='${val%%://*}' has_space=$([[ "$val" =~ [[:space:]] ]] && echo yes || echo no) has_quote=$([[ "$val" == *\"* || "$val" == *\'* ]] && echo yes || echo no)"
+          done
           # Migrations prefer Neon's direct (unpooled) connection when the integration provides one.
           DATABASE_URL="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}" npm run db:migrate
           # Idempotent: inserts missing content only, never overwrites edits made in /admin.

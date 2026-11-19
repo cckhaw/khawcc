@@ -15,10 +15,6 @@ const label = (n: string) => (/^\d/.test(n) ? n : n);
 export default async function BookPage() {
   const [parts, all] = await Promise.all([getParts(), getChapters({ includeDrafts: true })]);
   const visible = all.filter((c) => c.status !== "draft");
-  const total = all.length;
-  const pct = total ? Math.round((visible.length / total) * 100) : 0;
-  const finished = visible.filter((c) => c.status === "published").length;
-  const minutes = visible.reduce((n, c) => n + c.readingTimeMinutes, 0);
   const first = visible[0];
 
   const groups = [
@@ -47,25 +43,30 @@ export default async function BookPage() {
           )}
         </header>
 
-        <section className="glass mt-12 p-6" aria-label="Writing progress">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="eyebrow">Progress</p>
-              <p className="mt-1 text-sm text-muted">
-                <span className="font-semibold text-fg">{visible.length}</span> of {total} chapters online ·{" "}
-                {finished} finished · ~{minutes} min of reading
-              </p>
-            </div>
-            <p className="font-mono text-2xl font-semibold text-gradient">{pct}%</p>
-          </div>
-          <div
-            className="mt-4 h-2 overflow-hidden rounded-full bg-line"
-            role="progressbar"
-            aria-valuenow={pct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg, var(--accent), var(--accent-2))" }} />
+        <section className="glass mt-12 p-7 sm:p-9" aria-labelledby="wip-note">
+          <p className="eyebrow">A book still being written</p>
+          <h2 id="wip-note" className="mt-2 text-2xl font-semibold leading-snug sm:text-3xl">
+            Still a work in progress, and that&rsquo;s the point.
+          </h2>
+          <div className="mt-5 space-y-4 leading-relaxed text-muted">
+            <p>
+              I&rsquo;m moving into the last mile of my career, and with it the quiet, deliberate work of planning for
+              retirement. It turns out to be exactly the right season to write this book. When you start counting the
+              years you have left to build, you start noticing what really mattered: the people, the midnight
+              escalations you got through together, the platforms that quietly worked.
+            </p>
+            <p>
+              So <em>Thinking in Signals</em> isn&rsquo;t finished, and I don&rsquo;t want it to be yet. I&rsquo;m writing
+              it the way I lived the work: one chapter at a time, revising as I understand more, and sharing as I go.
+              Chapters will change. New ones will appear. Some stories will deepen once I find the words for them.
+            </p>
+            <p>
+              If you&rsquo;re somewhere in the middle of your own journey (tired, mid-migration, wondering whether it all
+              adds up), I hope these pages remind you that a career is never a straight line. It&rsquo;s a signal that
+              bends, roams, drops and reconnects. The last mile isn&rsquo;t where the signal ends. It&rsquo;s where you
+              finally get to pass it on.
+            </p>
+            <p className="font-display text-lg italic text-fg">Come back often. Walk it with me.</p>
           </div>
         </section>
 
@@ -99,11 +100,6 @@ export default async function BookPage() {
               </div>
             ))}
           </div>
-          {total > visible.length && (
-            <p className="mt-10 text-center font-mono text-xs text-dim">
-              {total - visible.length} more chapter{total - visible.length === 1 ? "" : "s"} in the works…
-            </p>
-          )}
         </section>
       </div>
     </div>

@@ -22,7 +22,7 @@ export default async function CvPage() {
       <div className="canvas-glow" />
       <div className="mx-auto max-w-4xl px-5 pb-8 pt-14 sm:px-8 md:pt-20">
         <header className="mb-12">
-          <p className="no-print font-mono text-xs uppercase tracking-[0.18em] text-dim">Curriculum vitae</p>
+          <p className="no-print eyebrow">Curriculum vitae</p>
           <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
             <div>
               <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{profile.fullName}</h1>
@@ -37,14 +37,14 @@ export default async function CvPage() {
         </header>
 
         <section aria-labelledby="exp">
-          <h2 id="exp" className="mb-6 text-sm font-semibold uppercase tracking-[0.16em] text-dim">
+          <h2 id="exp" className="mb-6 text-sm font-semibold tracking-wide text-dim">
             Experience
           </h2>
           <CvTimeline roles={roles} />
         </section>
 
         <section aria-labelledby="skills" className="mt-16 break-inside-avoid">
-          <h2 id="skills" className="mb-6 text-sm font-semibold uppercase tracking-[0.16em] text-dim">
+          <h2 id="skills" className="mb-6 text-sm font-semibold tracking-wide text-dim">
             Competencies, architecture &amp; credentials
           </h2>
           <div className="grid gap-4 md:grid-cols-2">

@@ -30,20 +30,12 @@ export function NavBar({ name }: { name: string }) {
   }, [pathname]);
 
   const active = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
-  const initials = name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 3);
 
   return (
     <header className="no-print sticky top-0 z-50 border-b border-line bg-[var(--nav)] backdrop-blur-xl backdrop-saturate-150">
       <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8" aria-label="Primary">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight" onClick={() => setOpen(false)}>
-          <span className="font-mono text-[15px]">
-            {initials}
-            <span className="text-accent">.</span>
-          </span>
+          <span className="font-display text-[17px] font-semibold tracking-tight">{name}</span>
         </Link>
 
         <ul className="hidden items-center gap-1 md:flex">
@@ -53,7 +45,7 @@ export function NavBar({ name }: { name: string }) {
                 href={l.href}
                 aria-current={active(l.href) ? "page" : undefined}
                 className={`rounded-full px-3.5 py-1.5 text-[13px] transition ${
-                  active(l.href) ? "bg-card text-fg" : "text-muted hover:text-fg"
+                  active(l.href) ? "bg-accent/10 text-accent font-medium" : "text-muted hover:text-fg"
                 }`}
               >
                 {l.label}
@@ -66,7 +58,7 @@ export function NavBar({ name }: { name: string }) {
           {admin && (
             <Link
               href="/admin"
-              className="hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 font-mono text-[11px] font-medium text-accent sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-[11px] font-semibold text-accent sm:inline-flex"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-accent" /> Admin Mode
             </Link>

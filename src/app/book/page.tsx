@@ -31,7 +31,7 @@ export default async function BookPage() {
       <div className="canvas-glow" />
       <div className="mx-auto max-w-4xl px-5 pb-8 pt-14 sm:px-8 md:pt-20">
         <header>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-dim">Work in progress · serialized</p>
+          <p className="eyebrow">Work in progress · serialized</p>
           <h1 className="mt-3 text-5xl font-semibold tracking-tight sm:text-6xl">
             Thinking in <span className="text-gradient">Signals</span>
           </h1>
@@ -50,7 +50,7 @@ export default async function BookPage() {
         <section className="glass mt-12 p-6" aria-label="Writing progress">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-xs uppercase tracking-[0.18em] text-dim">Progress</p>
+              <p className="eyebrow">Progress</p>
               <p className="mt-1 text-sm text-muted">
                 <span className="font-semibold text-fg">{visible.length}</span> of {total} chapters online ·{" "}
                 {finished} finished · ~{minutes} min of reading
@@ -70,7 +70,7 @@ export default async function BookPage() {
         </section>
 
         <section className="mt-14" aria-label="Table of contents">
-          <h2 className="mb-8 text-sm font-semibold uppercase tracking-[0.16em] text-dim">Table of contents</h2>
+          <h2 className="mb-8 text-sm font-semibold tracking-wide text-dim">Table of contents</h2>
           <div className="space-y-12">
             {groups.map((g) => (
               <div key={g.key}>

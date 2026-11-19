@@ -19,7 +19,9 @@ Next.js (App Router) + TypeScript + Tailwind v4 · Neon Postgres + Drizzle · de
 `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` (or preferred `ADMIN_PASSWORD_HASH`), `SESSION_SECRET` (16+ chars).
 
 ## UI rules
-- Tokens are CSS variables in `globals.css` (dark `#0A0A0C` default, light via `data-theme="light"`); use `bg-bg text-fg text-muted border-line`, `.glass` cards, `.btn`, `.field`.
-- Inter for UI, JetBrains Mono for dates/metrics/URLs. Reader measure `max-w-[68ch]`.
+- Warm, human look: light mode is the default (warm paper `#f7f4ef`), dark mode is warm ink (`#14110f`); tokens are CSS variables in `globals.css` (`data-theme="dark"` switches). Use `bg-bg text-fg text-muted border-line`, `.glass` (paper card), `.btn`, `.btn-primary`, `.field`, `.eyebrow`.
+- Fraunces (`font-display`, applied to h1-h3) for headlines, Inter for UI, JetBrains Mono only for dates/URLs/code. Avoid uppercase-mono "tech" labels.
+- Hero portrait: `public/img/portrait-light.webp` (light mode) and `portrait-dark.webp` (dark mode) are background-removed cut-outs made by `scripts/cutout.py`; `profile.avatarUrl` overrides both.
+- Reader measure `max-w-[68ch]`.
 - Anything hidden when printing gets `.no-print`; `@media print` forces black-on-white and expands all CV roles.
 - New admin mutations must call `revalidateAll()`; new public data goes through `src/lib/data.ts`.

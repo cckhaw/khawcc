@@ -30,7 +30,7 @@ export default async function AdminDashboard() {
         ))}
       </div>
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-dim">Quick create</h2>
+        <h2 className="mb-4 text-sm font-semibold tracking-wide text-dim">Quick create</h2>
         <div className="flex flex-wrap gap-3">
           {quick.map((q) => (
             <Link key={q.href} href={q.href} className="btn">

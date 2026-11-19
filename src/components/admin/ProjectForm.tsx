@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { PROJECT_CATEGORIES, PROJECT_STATUSES } from "@/db/constants";
 import type { Project } from "@/db/schema";
 import { fetchMetaAction, saveProject } from "@/lib/actions/projects";
+import { LogoField } from "./LogoField";
 import { RichTextEditor, type RichTextHandle } from "./RichTextEditor";
 import { Block, Field, SubmitButton } from "./ui";
 
@@ -15,7 +16,10 @@ export function ProjectForm({ p }: { p?: Project }) {
 
   function fill(name: string, value: string, onlyIfEmpty = true) {
     const el = ref.current?.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null;
-    if (el && value && (!onlyIfEmpty || !el.value.trim())) el.value = value;
+    if (el && value && (!onlyIfEmpty || !el.value.trim())) {
+      el.value = value;
+      el.dispatchEvent(new Event("input", { bubbles: true })); // refresh previews bound to the field
+    }
   }
 
   function fetchMeta() {
@@ -58,9 +62,7 @@ export function ProjectForm({ p }: { p?: Project }) {
           {PROJECT_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       </Field>
-      <Field label="Logo / icon URL" hint="Filled by “Fetch meta”. Use a full https URL or a /public path. Blank shows an initial." className="sm:col-span-2">
-        <input name="logoUrl" defaultValue={p?.logoUrl} className="field font-mono text-[13px]" />
-      </Field>
+      <div className="sm:col-span-2"><LogoField label="Logo / icon" defaultValue={p?.logoUrl} fallbackName={p?.name ?? ""} /></div>
       <Field label="Tagline" className="sm:col-span-2"><input name="tagline" defaultValue={p?.tagline} className="field" /></Field>
       <Block label="Description" className="sm:col-span-2"><RichTextEditor ref={descRef} name="description" value={p?.description ?? ""} minHeight="8rem" /></Block>
       <Field label="Tech stack" hint="Comma-separated tags." className="sm:col-span-2"><input name="techStack" defaultValue={p?.techStack.join(", ")} className="field" /></Field>

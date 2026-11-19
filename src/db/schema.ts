@@ -46,6 +46,8 @@ export const experiences = pgTable("experiences", {
   startDate: date("start_date", { mode: "string" }).notNull(),
   endDate: date("end_date", { mode: "string" }),
   isCurrent: boolean("is_current").notNull().default(false),
+  /** Company logo: https URL, /public path or /media/<id>. Empty = initial-letter tile. */
+  logoUrl: text("logo_url").notNull().default(""),
   domainTag: text("domain_tag").notNull().default("Telco & BSS"),
   summary: text("summary").notNull().default(""),
   highlights: jsonb("highlights").$type<string[]>().notNull().default([]),

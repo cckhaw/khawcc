@@ -22,6 +22,14 @@ async function main() {
     await db.insert(schema.experiences).values(seedExperiences.map(({ id, createdAt, updatedAt, ...r }) => (void [id, createdAt, updatedAt], r)));
     console.log(`+ ${seedExperiences.length} experiences`);
   } else console.log("= experiences already present");
+  // Backfill company logos on existing rows only where none is set (never overwrites admin edits).
+  for (const e of seedExperiences) {
+    if (!e.logoUrl) continue;
+    await db
+      .update(schema.experiences)
+      .set({ logoUrl: e.logoUrl })
+      .where(and(eq(schema.experiences.company, e.company), eq(schema.experiences.logoUrl, "")));
+  }
 
   const [anySkill] = await db.select({ id: schema.skillsAndCredentials.id }).from(schema.skillsAndCredentials).limit(1);
   if (!anySkill) {

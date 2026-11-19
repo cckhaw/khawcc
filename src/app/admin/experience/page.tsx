@@ -1,4 +1,5 @@
 import { ExperienceForm } from "@/components/admin/ExperienceForm";
+import { ProjectLogo } from "@/components/ProjectLogo";
 import { ConfirmButton } from "@/components/admin/ui";
 import { ArrowDown, ArrowUp, EyeIcon, EyeOffIcon } from "@/components/icons";
 import { deleteExperience, moveExperience, toggleExperience } from "@/lib/actions/experience";
@@ -28,6 +29,7 @@ export default async function AdminExperience({ searchParams }: { searchParams: 
                 <form action={moveExperience}><input type="hidden" name="id" value={r.id} /><input type="hidden" name="dir" value="down" />
                   <button className="btn btn-sm !px-2" disabled={i === rows.length - 1} aria-label="Move down"><ArrowDown width={14} height={14} /></button></form>
               </div>
+              <ProjectLogo name={r.company} logoUrl={r.logoUrl} size={36} />
               <div className="min-w-0 flex-1">
                 <p className="font-medium leading-snug">{r.roleTitle}</p>
                 <p className="text-sm text-muted">{r.company} · <span className="font-mono text-xs">{fmtPeriod(r.startDate, r.endDate, r.isCurrent)}</span> · <span className="font-mono text-xs text-dim">{r.domainTag}</span></p>

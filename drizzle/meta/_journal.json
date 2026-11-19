@@ -15,6 +15,13 @@
       "when": 1795060154573,
       "tag": "0001_project_logo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795065600275,
+      "tag": "0002_publish_all_chapters",
+      "breakpoints": true
     }
   ]
 }

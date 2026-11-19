@@ -6,12 +6,31 @@ import { z } from "zod";
 import { requireDb, schema } from "@/db";
 import { CHAPTER_STATUSES } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import { BOOK_INTRO_KEY, sanitizeBookIntro } from "@/lib/book-intro";
 import { sanitizeMedia } from "@/lib/media";
 import { readingTime, slugify } from "@/lib/markdown";
 import { int, raw, revalidateAll, str } from "./util";
 
 const ch = schema.bookChapters;
 const pt = schema.bookParts;
+
+/* ---------------- Landing-page text ---------------- */
+
+export async function saveBookIntro(fd: FormData) {
+  await requireAdmin();
+  const doc = sanitizeBookIntro({
+    intro: raw(fd, "intro"),
+    noteEyebrow: str(fd, "noteEyebrow"),
+    noteTitle: str(fd, "noteTitle"),
+    noteBody: raw(fd, "noteBody"),
+  });
+  await requireDb()
+    .insert(schema.siteContent)
+    .values({ key: BOOK_INTRO_KEY, value: doc })
+    .onConflictDoUpdate({ target: schema.siteContent.key, set: { value: doc, updatedAt: new Date() } });
+  revalidateAll();
+  redirect("/admin/book?saved=1");
+}
 
 /* ---------------- Parts ---------------- */
 

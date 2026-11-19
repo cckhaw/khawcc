@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ConfirmButton, Field, SubmitButton } from "@/components/admin/ui";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { Block, ConfirmButton, Field, SubmitButton } from "@/components/admin/ui";
 import { ArrowDown, ArrowUp } from "@/components/icons";
 import { ChapterBadge } from "@/components/ui/StatusBadge";
-import { deleteChapter, deletePart, moveChapter, movePart, savePart } from "@/lib/actions/book";
+import { deleteChapter, deletePart, moveChapter, movePart, saveBookIntro, savePart } from "@/lib/actions/book";
 import { requireAdmin } from "@/lib/auth";
-import { getChapters, getParts } from "@/lib/data";
+import { getBookIntro, getChapters, getParts } from "@/lib/data";
 
 export const metadata = { title: "Book" };
 
@@ -20,9 +21,9 @@ function Move({ action, id, dir, disabled }: { action: (fd: FormData) => Promise
   );
 }
 
-export default async function AdminBook() {
+export default async function AdminBook({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   await requireAdmin();
-  const [parts, chapters] = await Promise.all([getParts(), getChapters({ includeDrafts: true })]);
+  const [parts, chapters, intro, sp] = await Promise.all([getParts(), getChapters({ includeDrafts: true }), getBookIntro(), searchParams]);
   const groups = [
     ...parts.map((p) => ({ part: p, items: chapters.filter((c) => c.partId === p.id) })),
     { part: null, items: chapters.filter((c) => !parts.some((p) => p.id === c.partId)) },
@@ -35,6 +36,25 @@ export default async function AdminBook() {
         <h1 className="text-3xl font-semibold tracking-tight">Thinking in Signals</h1>
         <Link href="/admin/book/new" className="btn btn-primary">New chapter</Link>
       </div>
+
+      {sp.saved && <p className="rounded-xl border border-good/40 bg-good/10 px-4 py-2 text-sm text-good">Saved. The site has been revalidated.</p>}
+
+      <details className="glass p-4 sm:p-5">
+        <summary className="cursor-pointer text-lg font-semibold">Book page text <span className="ml-2 text-sm font-normal text-muted">(intro and the “still being written” note)</span></summary>
+        <form action={saveBookIntro} className="mt-5 space-y-4">
+          <Field label="Intro under the title" hint="Shown below “Thinking in Signals”. Leave blank to hide.">
+            <textarea name="intro" rows={3} defaultValue={intro.intro} className="field" />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
+            <Field label="Note label"><input name="noteEyebrow" defaultValue={intro.noteEyebrow} className="field" /></Field>
+            <Field label="Note heading"><input name="noteTitle" defaultValue={intro.noteTitle} className="field" /></Field>
+          </div>
+          <Block label="Note text" hint="Shown in the card under the intro. Clear the heading and text to hide the note.">
+            <RichTextEditor name="noteBody" value={intro.noteBody} minHeight="14rem" variant="basic" />
+          </Block>
+          <SubmitButton>Save book page text</SubmitButton>
+        </form>
+      </details>
 
       <div className="space-y-8">
         {groups.map(({ part, items }, gi) => (

@@ -11,6 +11,7 @@ import {
 } from "@/db/seed-data";
 import { DEFAULT_APAC_DOC } from "@/data/apac-projects";
 import { sanitizeApacDoc, type ApacDoc } from "@/lib/apac";
+import { BOOK_INTRO_KEY, DEFAULT_BOOK_INTRO, sanitizeBookIntro, type BookIntro } from "@/lib/book-intro";
 import type { BookChapter, BookPart, Experience, Profile, Project, SkillGroup } from "@/db/schema";
 
 /**
@@ -166,4 +167,12 @@ export async function getApacDoc(): Promise<ApacDoc> {
   if (!row) return DEFAULT_APAC_DOC;
   const doc = sanitizeApacDoc(row.value);
   return doc.items.length ? doc : DEFAULT_APAC_DOC;
+}
+
+/** Text at the top of /book: from the database when edited, otherwise the built-in default. */
+export async function getBookIntro(): Promise<BookIntro> {
+  const db = getDb();
+  if (!db) return DEFAULT_BOOK_INTRO;
+  const [row] = await db.select().from(schema.siteContent).where(eq(schema.siteContent.key, BOOK_INTRO_KEY));
+  return row ? sanitizeBookIntro(row.value) : DEFAULT_BOOK_INTRO;
 }

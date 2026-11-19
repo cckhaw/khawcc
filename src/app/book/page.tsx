@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "@/components/icons";
+import { Markdown } from "@/components/Markdown";
 import { ChapterBadge } from "@/components/ui/StatusBadge";
-import { getChapters, getParts } from "@/lib/data";
+import { getBookIntro, getChapters, getParts } from "@/lib/data";
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 const label = (n: string) => (/^\d/.test(n) ? n : n);
 
 export default async function BookPage() {
-  const [parts, all] = await Promise.all([getParts(), getChapters({ includeDrafts: true })]);
+  const [parts, all, intro] = await Promise.all([getParts(), getChapters({ includeDrafts: true }), getBookIntro()]);
   const visible = all.filter((c) => c.status !== "draft");
   const first = visible[0];
 
@@ -31,11 +32,7 @@ export default async function BookPage() {
           <h1 className="mt-3 text-5xl font-semibold tracking-tight sm:text-6xl">
             Thinking in <span className="text-gradient">Signals</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
-            Twenty-five years in telecommunications, platform engineering, leadership and team management: the
-            networks, the people and the midnight escalations. Not a textbook. A signal that bent, roamed, dropped,
-            reconnected, and always found its way forward.
-          </p>
+          {intro.intro && <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{intro.intro}</p>}
           {first && (
             <Link href={`/book/${first.slug}`} className="btn btn-primary mt-8">
               Start reading <ArrowRight />
@@ -43,32 +40,15 @@ export default async function BookPage() {
           )}
         </header>
 
-        <section className="glass mt-12 p-7 sm:p-9" aria-labelledby="wip-note">
-          <p className="eyebrow">A book still being written</p>
-          <h2 id="wip-note" className="mt-2 text-2xl font-semibold leading-snug sm:text-3xl">
-            Still a work in progress, and that&rsquo;s the point.
-          </h2>
-          <div className="mt-5 space-y-4 leading-relaxed text-muted">
-            <p>
-              I&rsquo;m moving into the last mile of my career, and with it the quiet, deliberate work of planning for
-              retirement. It turns out to be exactly the right season to write this book. When you start counting the
-              years you have left to build, you start noticing what really mattered: the people, the midnight
-              escalations you got through together, the platforms that quietly worked.
-            </p>
-            <p>
-              So <em>Thinking in Signals</em> isn&rsquo;t finished, and I don&rsquo;t want it to be yet. I&rsquo;m writing
-              it the way I lived the work: one chapter at a time, revising as I understand more, and sharing as I go.
-              Chapters will change. New ones will appear. Some stories will deepen once I find the words for them.
-            </p>
-            <p>
-              If you&rsquo;re somewhere in the middle of your own journey (tired, mid-migration, wondering whether it all
-              adds up), I hope these pages remind you that a career is never a straight line. It&rsquo;s a signal that
-              bends, roams, drops and reconnects. The last mile isn&rsquo;t where the signal ends. It&rsquo;s where you
-              finally get to pass it on.
-            </p>
-            <p className="font-display text-lg italic text-fg">Come back often. Walk it with me.</p>
-          </div>
-        </section>
+        {(intro.noteTitle || intro.noteBody) && (
+          <section className="glass mt-12 p-7 sm:p-9" aria-labelledby="wip-note">
+            {intro.noteEyebrow && <p className="eyebrow">{intro.noteEyebrow}</p>}
+            <h2 id="wip-note" className="mt-2 text-2xl font-semibold leading-snug sm:text-3xl">
+              {intro.noteTitle}
+            </h2>
+            <Markdown className="mt-5 leading-relaxed text-muted">{intro.noteBody}</Markdown>
+          </section>
+        )}
 
         <section className="mt-14" aria-label="Table of contents">
           <h2 className="mb-8 text-sm font-semibold tracking-wide text-dim">Table of contents</h2>
@@ -88,6 +68,11 @@ export default async function BookPage() {
                         <span className="min-w-0 flex-1">
                           <span className="block font-medium leading-snug">{c.title}</span>
                           {c.summary && <span className="mt-1 line-clamp-2 block text-sm text-muted">{c.summary}</span>}
+                          {c.status === "wip_published" && (
+                            <span className="mt-2 block sm:hidden">
+                              <ChapterBadge status={c.status} />
+                            </span>
+                          )}
                         </span>
                         <span className="hidden shrink-0 flex-col items-end gap-1.5 sm:flex">
                           {c.status === "wip_published" && <ChapterBadge status={c.status} />}

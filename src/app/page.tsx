@@ -50,8 +50,8 @@ export default async function HomePage() {
               Hi, I&rsquo;m {profile.fullName}
               <span className="text-dim"> · {profile.location.split("·")[0].trim()} &amp; Singapore</span>
             </p>
-            <h1 className="mt-5 text-[2.6rem] font-semibold leading-[1.08] sm:text-6xl">
-              I help telcos turn complex platforms into things that <span className="text-gradient">quietly work.</span>
+            <h1 className="mt-5 text-[2.3rem] font-semibold leading-[1.1] sm:text-5xl lg:text-[3.4rem]">
+              I lead large-scale technology and business transformations and <span className="text-gradient">build AI‑powered products.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">{profile.heroBio}</p>
             <p className="mt-3 text-sm text-dim">{headlineParts.join(" · ")}</p>

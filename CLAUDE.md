@@ -13,7 +13,7 @@ Next.js (App Router) + TypeScript + Tailwind v4 · Neon Postgres + Drizzle · de
 
 ## Commands
 `npm run dev | build | lint | typecheck`
-`npm run db:generate` (new migration from schema) · `db:migrate` (apply migrations) · `db:push` (sync schema directly) · `db:seed` · `hash-password -- "pass"`
+`npm run db:generate` (new migration from schema) · `db:migrate` (apply migrations over HTTP via `src/db/migrate.ts`) · `db:push` (sync schema directly) · `db:seed` · `hash-password -- "pass"`
 
 ## Environment (`.env.example`)
 `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` (or preferred `ADMIN_PASSWORD_HASH`), `SESSION_SECRET` (16+ chars).

@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
 import { ApacPoster } from "@/components/ApacMap";
+import { DownloadPoster } from "@/components/DownloadPoster";
+import { getApacDoc } from "@/lib/data";
 
-export const metadata: Metadata = { title: "APAC transformation (image)", robots: { index: false, follow: false } };
+export const revalidate = 3600;
+export const metadata: Metadata = { title: "Telecom & digital transformation across APAC", robots: { index: false, follow: false } };
 
-/** Unlisted page used to render the shareable infographic (see public/img/apac-transformation.png). */
-export default function ApacPosterPage() {
+/** Shareable infographic (e.g. for LinkedIn), always in sync with the map on the home page. */
+export default async function ApacPosterPage() {
+  const doc = await getApacDoc();
   return (
-    <div className="flex justify-center overflow-x-auto bg-white py-8">
-      <ApacPoster />
+    <div className="mx-auto max-w-[1280px] px-5 py-10">
+      <DownloadPoster />
+      <div className="overflow-x-auto">
+        <ApacPoster doc={doc} />
+      </div>
     </div>
   );
 }

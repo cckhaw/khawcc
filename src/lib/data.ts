@@ -9,6 +9,8 @@ import {
   seedProjects,
   seedSkills,
 } from "@/db/seed-data";
+import { DEFAULT_APAC_DOC } from "@/data/apac-projects";
+import { sanitizeApacDoc, type ApacDoc } from "@/lib/apac";
 import type { BookChapter, BookPart, Experience, Profile, Project, SkillGroup } from "@/db/schema";
 
 /**
@@ -152,4 +154,16 @@ export async function getAdminStats() {
     published: chapters.filter((c) => c.status !== "draft").length,
     drafts: chapters.filter((c) => c.status === "draft").length,
   };
+}
+
+export const APAC_KEY = "apac_map";
+
+/** The APAC map document: from the database when edited/seeded, otherwise the built-in default. */
+export async function getApacDoc(): Promise<ApacDoc> {
+  const db = getDb();
+  if (!db) return DEFAULT_APAC_DOC;
+  const [row] = await db.select().from(schema.siteContent).where(eq(schema.siteContent.key, APAC_KEY));
+  if (!row) return DEFAULT_APAC_DOC;
+  const doc = sanitizeApacDoc(row.value);
+  return doc.items.length ? doc : DEFAULT_APAC_DOC;
 }

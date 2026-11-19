@@ -8,18 +8,19 @@ import { Markdown } from "@/components/Markdown";
 import { Portrait } from "@/components/Portrait";
 import { ProjectCard } from "@/components/ProjectCard";
 import { SectionHeader } from "@/components/ui/Section";
-import { getExperiences, getLatestChapters, getProfile, getProjects } from "@/lib/data";
+import { getApacDoc, getExperiences, getLatestChapters, getProfile, getProjects } from "@/lib/data";
 import { yearsBetween } from "@/lib/format";
 import { PrintButton } from "@/components/PrintButton";
 
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [profile, experiences, projects, chapters] = await Promise.all([
+  const [profile, experiences, projects, chapters, apac] = await Promise.all([
     getProfile(),
     getExperiences(),
     getProjects(),
     getLatestChapters(3),
+    getApacDoc(),
   ]);
   const featured = projects.filter((p) => p.featuredOnCv);
   const earliest = experiences.reduce((m, e) => (e.startDate < m ? e.startDate : m), "2001-06-01");
@@ -109,11 +110,11 @@ export default async function HomePage() {
               transformation I&rsquo;m leading now. Hover a project to find it on the map.
             </p>
           </div>
-          <a href="/img/apac-transformation.png" download className="no-print text-sm text-muted hover:text-fg">
-            Download as image ↓
-          </a>
+          <Link href="/apac-map" className="no-print text-sm text-muted hover:text-fg">
+            Get the shareable image →
+          </Link>
         </div>
-        <ApacMap />
+        <ApacMap doc={apac} />
       </section>
 
       {/* ---------------- About ---------------- */}

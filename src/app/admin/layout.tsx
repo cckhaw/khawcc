@@ -13,6 +13,7 @@ const TABS = [
   { href: "/admin/experience", label: "Experience" },
   { href: "/admin/projects", label: "Projects" },
   { href: "/admin/book", label: "Book" },
+  { href: "/admin/map", label: "APAC map" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

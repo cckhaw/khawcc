@@ -43,6 +43,13 @@
       "when": 1795077344895,
       "tag": "0005_experience_logo",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795082382946,
+      "tag": "0006_site_content",
+      "breakpoints": true
     }
   ]
 }

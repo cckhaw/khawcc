@@ -127,6 +127,13 @@ export const bookChapters = pgTable(
   (t) => [uniqueIndex("book_chapters_slug_idx").on(t.slug)],
 );
 
+/** Small key/value documents edited in the admin (e.g. the APAC map). */
+export const siteContent = pgTable("site_content", {
+  key: varchar("key", { length: 64 }).primaryKey(),
+  value: jsonb("value").$type<unknown>().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 /** Images uploaded from the admin (stored in Postgres, served at /media/<id>). */
 export const mediaFiles = pgTable("media_files", {
   id: serial("id").primaryKey(),

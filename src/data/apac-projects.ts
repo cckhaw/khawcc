@@ -1,4 +1,7 @@
-/** Selected projects across APAC. Pin positions live in apac-map.json (built by scripts/build-apac-map.mjs). */
+/** Default content for the APAC map (used until it is edited in /admin/map). Pin positions come from apac-map.json (scripts/build-apac-map.mjs). */
+import map from "./apac-map.json";
+import type { ApacDoc } from "../lib/apac";
+
 export type ApacProject = {
   id: string;
   text: string;
@@ -34,6 +37,21 @@ export const APAC_PROJECTS: ApacProject[] = [
     id: "P",
     place: "Malaysia",
     current: true,
-    text: "Lead the full-stack BSS transformation from Amdocs to Huawei (CRM, Product Catalog, Billing & Charging and integrations) for Maxis",
+    text: "Lead the full-stack BSS transformation (CRM, Product Catalog, Billing & Charging and integrations) for Maxis",
   },
 ];
+
+const pins = map.pins as Record<string, number[]>;
+
+export const DEFAULT_APAC_DOC: ApacDoc = {
+  stats: APAC_STATS,
+  items: APAC_PROJECTS.map((p) => ({
+    id: `seed-${p.id}`,
+    text: p.text,
+    place: p.place,
+    current: Boolean(p.current),
+    visible: true,
+    x: pins[p.id][0],
+    y: pins[p.id][1],
+  })),
+};

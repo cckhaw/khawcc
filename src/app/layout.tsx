@@ -9,7 +9,7 @@ export const revalidate = 3600;
 export async function generateMetadata(): Promise<Metadata> {
   const p = await getProfile();
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://khaw.cc"),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.khaw.cc"),
     title: { default: `${p.fullName} · ${p.headline.split("·")[0].trim()}`, template: `%s · ${p.fullName}` },
     description: p.heroBio,
     openGraph: { title: p.fullName, description: p.headline, type: "website", siteName: p.fullName, url: "/" },

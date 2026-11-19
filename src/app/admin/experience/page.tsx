@@ -22,31 +22,37 @@ export default async function AdminExperience({ searchParams }: { searchParams: 
       <ul className="space-y-3">
         {rows.map((r, i) => (
           <li key={r.id} className={`glass p-4 ${r.isVisible ? "" : "opacity-60"}`}>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex flex-col gap-1">
-                <form action={moveExperience}><input type="hidden" name="id" value={r.id} /><input type="hidden" name="dir" value="up" />
-                  <button className="btn btn-sm !px-2" disabled={i === 0} aria-label="Move up"><ArrowUp width={14} height={14} /></button></form>
-                <form action={moveExperience}><input type="hidden" name="id" value={r.id} /><input type="hidden" name="dir" value="down" />
-                  <button className="btn btn-sm !px-2" disabled={i === rows.length - 1} aria-label="Move down"><ArrowDown width={14} height={14} /></button></form>
-              </div>
-              <ProjectLogo name={r.company} logoUrl={r.logoUrl} size={36} />
+            <div className="flex items-start gap-3">
+              <ProjectLogo name={r.company} logoUrl={r.logoUrl} size={44} />
               <div className="min-w-0 flex-1">
                 <p className="font-medium leading-snug">{r.roleTitle}</p>
-                <p className="text-sm text-muted">{r.company} · <span className="font-mono text-xs">{fmtPeriod(r.startDate, r.endDate, r.isCurrent)}</span> · <span className="font-mono text-xs text-dim">{r.domainTag}</span></p>
+                <p className="mt-0.5 text-sm text-muted">
+                  {r.company}
+                  <span className="text-dim"> · {r.location}</span>
+                </p>
+                <p className="mt-1 font-mono text-[11px] text-dim">
+                  {fmtPeriod(r.startDate, r.endDate, r.isCurrent)} · {r.domainTag}
+                </p>
               </div>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <form action={moveExperience}><input type="hidden" name="id" value={r.id} /><input type="hidden" name="dir" value="up" />
+                <button className="btn btn-sm !px-2.5" disabled={i === 0} aria-label="Move up"><ArrowUp width={14} height={14} /></button></form>
+              <form action={moveExperience}><input type="hidden" name="id" value={r.id} /><input type="hidden" name="dir" value="down" />
+                <button className="btn btn-sm !px-2.5" disabled={i === rows.length - 1} aria-label="Move down"><ArrowDown width={14} height={14} /></button></form>
               <form action={toggleExperience}>
                 <input type="hidden" name="id" value={r.id} />
                 <button className="btn btn-sm" aria-label={r.isVisible ? "Hide from site" : "Show on site"}>
                   {r.isVisible ? <><EyeIcon width={14} height={14} /> Visible</> : <><EyeOffIcon width={14} height={14} /> Hidden</>}
                 </button>
               </form>
-              <form action={deleteExperience}>
+              <form action={deleteExperience} className="ml-auto">
                 <input type="hidden" name="id" value={r.id} />
                 <ConfirmButton message={`Delete “${r.roleTitle}” at ${r.company}?`}>Delete</ConfirmButton>
               </form>
             </div>
             <details className="mt-3 border-t border-line pt-3">
-              <summary className="cursor-pointer text-[13px] text-muted hover:text-fg">Edit details & highlights</summary>
+              <summary className="cursor-pointer text-[13px] text-muted hover:text-fg">Edit role details & achievements</summary>
               <div className="pt-4"><ExperienceForm e={r} tagOptions={tagOptions} /></div>
             </details>
           </li>

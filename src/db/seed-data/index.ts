@@ -236,7 +236,6 @@ export const seedSkills: SkillGroup[] = [
     category: "Architecture & Stack",
     items: [
       "CRM · Product Catalog · Billing & Charging",
-      "Amdocs → Huawei migration",
       "API monetisation & partner integration",
       "Digital KYC & self-onboarding",
       "Next.js · TypeScript · Tailwind",

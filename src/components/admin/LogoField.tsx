@@ -40,14 +40,6 @@ export function LogoField({ name = "logoUrl", label, defaultValue = "", fallback
       <span className="mb-1.5 block text-[13px] font-medium text-muted">{label}</span>
       <div className="flex flex-wrap items-center gap-3">
         <ProjectLogo name={fallbackName || "?"} logoUrl={url} size={48} />
-        <input
-          ref={input}
-          name={name}
-          defaultValue={defaultValue}
-          onInput={(e) => setUrl(e.currentTarget.value)}
-          placeholder="https://… or upload"
-          className="field min-w-0 flex-1 font-mono text-[13px]"
-        />
         <input ref={file} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => onFile(e.target.files?.[0])} />
         <button type="button" className="btn btn-sm" disabled={busy} onClick={() => file.current?.click()}>
           {busy ? "Uploading…" : "Upload"}
@@ -58,6 +50,15 @@ export function LogoField({ name = "logoUrl", label, defaultValue = "", fallback
           </button>
         )}
       </div>
+      <input
+        ref={input}
+        name={name}
+        defaultValue={defaultValue}
+        onInput={(e) => setUrl(e.currentTarget.value)}
+        placeholder="…or paste an image address (https://…)"
+        aria-label={`${label} address`}
+        className="field mt-2 w-full font-mono text-[13px]"
+      />
       {msg && <p role="status" className="mt-1 text-xs text-danger">{msg}</p>}
       <span className="mt-1 block text-xs text-dim">Shown as a small square. Leave blank for an initial letter.</span>
     </div>

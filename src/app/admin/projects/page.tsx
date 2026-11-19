@@ -25,14 +25,18 @@ export default async function AdminProjects({ searchParams }: { searchParams: Pr
       <ul className="space-y-3">
         {rows.map((p) => (
           <li key={p.id} className="glass p-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <ProjectLogo name={p.name} logoUrl={p.logoUrl} size={36} />
+            <div className="flex items-start gap-3">
+              <ProjectLogo name={p.name} logoUrl={p.logoUrl} size={40} />
               <div className="min-w-0 flex-1">
-                <p className="font-medium">{p.name} <span className="font-mono text-xs text-dim">/{p.slug} · #{p.sortOrder}</span></p>
-                <p className="truncate text-sm text-muted">{p.category} · {p.url}{p.featuredOnCv ? " · ★ featured" : ""}</p>
+                <p className="font-medium leading-snug">{p.name} <span className="font-mono text-xs text-dim">/{p.slug}</span></p>
+                <p className="mt-0.5 break-words text-sm text-muted">{p.category}{p.featuredOnCv ? " · ★ featured" : ""}</p>
+                <p className="mt-0.5 truncate font-mono text-[11px] text-dim">{p.url}</p>
               </div>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <StatusBadge status={p.status} />
-              <form action={deleteProject}>
+              <span className="font-mono text-[11px] text-dim">order #{p.sortOrder}</span>
+              <form action={deleteProject} className="ml-auto">
                 <input type="hidden" name="id" value={p.id} />
                 <ConfirmButton message={`Delete ${p.name}?`}>Delete</ConfirmButton>
               </form>

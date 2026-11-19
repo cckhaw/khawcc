@@ -50,6 +50,13 @@
       "when": 1795082382946,
       "tag": "0006_site_content",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795097738980,
+      "tag": "0007_remove_amdocs_skill",
+      "breakpoints": true
     }
   ]
 }

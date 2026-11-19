@@ -71,25 +71,27 @@ export default async function AdminBook() {
             ) : (
               <ul className="space-y-2">
                 {items.map((c, i) => (
-                  <li key={c.id} className="glass flex flex-wrap items-center gap-3 p-3">
-                    <div className="flex gap-1">
+                  <li key={c.id} className="glass p-3">
+                    <div className="flex items-start gap-3">
+                      <span className="w-12 shrink-0 pt-0.5 font-mono text-xs text-dim">{c.chapterNumber}</span>
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/admin/book/${c.id}`} className="font-medium leading-snug hover:text-accent">{c.title}</Link>
+                        <p className="mt-0.5 break-all font-mono text-[11px] text-dim">/{c.slug} · {c.readingTimeMinutes} min</p>
+                      </div>
+                      <ChapterBadge status={c.status} />
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
                       <Move action={moveChapter} id={c.id} dir="up" disabled={i === 0} />
                       <Move action={moveChapter} id={c.id} dir="down" disabled={i === items.length - 1} />
+                      <Link href={`/book/${c.slug}`} target="_blank" className="btn btn-sm">
+                        {c.status === "draft" ? "Preview Draft" : "View"}
+                      </Link>
+                      <Link href={`/admin/book/${c.id}`} className="btn btn-sm">Edit</Link>
+                      <form action={deleteChapter} className="ml-auto">
+                        <input type="hidden" name="id" value={c.id} />
+                        <ConfirmButton message={`Delete chapter “${c.title}”? This cannot be undone.`}>Delete</ConfirmButton>
+                      </form>
                     </div>
-                    <span className="w-14 shrink-0 font-mono text-xs text-dim">{c.chapterNumber}</span>
-                    <div className="min-w-0 flex-1">
-                      <Link href={`/admin/book/${c.id}`} className="font-medium hover:text-accent">{c.title}</Link>
-                      <p className="font-mono text-[11px] text-dim">/{c.slug} · {c.readingTimeMinutes} min</p>
-                    </div>
-                    <ChapterBadge status={c.status} />
-                    <Link href={`/book/${c.slug}`} target="_blank" className="btn btn-sm">
-                      {c.status === "draft" ? "Preview Draft" : "View"}
-                    </Link>
-                    <Link href={`/admin/book/${c.id}`} className="btn btn-sm">Edit</Link>
-                    <form action={deleteChapter}>
-                      <input type="hidden" name="id" value={c.id} />
-                      <ConfirmButton message={`Delete chapter “${c.title}”? This cannot be undone.`}>Delete</ConfirmButton>
-                    </form>
                   </li>
                 ))}
               </ul>

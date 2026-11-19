@@ -26,9 +26,11 @@ export default async function HomePage() {
   const earliest = experiences.reduce((m, e) => (e.startDate < m ? e.startDate : m), "2001-06-01");
   const years = Math.floor(yearsBetween(earliest, null));
   const headlineParts = profile.headline.split("·").map((s) => s.trim());
+  // Every employer, newest first. Short names for the long ones ("M1 Limited" -> "M1"); joint names stay whole
+  // ("Acision / LogicaCMG"), and "A & B" shows the first company ("ADC Software Systems").
   const companies = Array.from(
-    new Set(experiences.map((e) => e.company.split(" / ")[0].replace(/ (Limited|Networks|Systems.*)$/i, ""))),
-  ).slice(0, 7);
+    new Set(experiences.map((e) => e.company.split(" & ")[0].replace(/ (Limited|Networks)$/i, ""))),
+  );
 
   const impact = [
     { k: `${years}+`, t: "Years in Telco & ICT", d: "From support desk to programme director, across Malaysia, Singapore and APAC." },

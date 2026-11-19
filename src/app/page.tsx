@@ -10,6 +10,7 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { SectionHeader } from "@/components/ui/Section";
 import { getApacDoc, getExperiences, getLatestChapters, getProfile, getProjects } from "@/lib/data";
 import { yearsBetween } from "@/lib/format";
+import { headlineParts as splitHeadline } from "@/lib/hero";
 import { PrintButton } from "@/components/PrintButton";
 
 export const revalidate = 3600;
@@ -51,7 +52,15 @@ export default async function HomePage() {
               <span className="text-dim"> · {profile.location.split("·")[0].trim()} &amp; Singapore</span>
             </p>
             <h1 className="mt-5 text-[2.3rem] font-semibold leading-[1.1] sm:text-5xl lg:text-[3.4rem]">
-              I lead large-scale technology and business transformations and <span className="text-gradient">build AI‑powered products.</span>
+              {splitHeadline(profile.heroHeadline).map((part, i) =>
+                part.accent ? (
+                  <span key={i} className="text-gradient">
+                    {part.text}
+                  </span>
+                ) : (
+                  <span key={i}>{part.text}</span>
+                ),
+              )}
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">{profile.heroBio}</p>
             <p className="mt-3 text-sm text-dim">{headlineParts.join(" · ")}</p>

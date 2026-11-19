@@ -1,0 +1,1 @@
+ALTER TABLE "profile_settings" ADD COLUMN "hero_headline" text DEFAULT '' NOT NULL;

@@ -2,6 +2,7 @@ import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { Block, Field, SubmitButton } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth";
 import { getProfile } from "@/lib/data";
+import { DEFAULT_HERO_HEADLINE } from "@/lib/hero";
 import { saveProfile } from "@/lib/actions/profile";
 
 export default async function AdminProfile({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
@@ -25,6 +26,9 @@ export default async function AdminProfile({ searchParams }: { searchParams: Pro
           </Field>
         </div>
         <div className="glass space-y-4 p-6">
+          <Field label="Home page headline" hint="The big line at the top of the home page. Put **double asterisks** around the words that should be coloured, e.g. I lead big programmes and **build AI-powered products.**">
+            <textarea name="heroHeadline" defaultValue={p.heroHeadline || DEFAULT_HERO_HEADLINE} rows={2} maxLength={240} className="field text-[15px]" />
+          </Field>
           <Field label="Hero bio"><textarea name="heroBio" defaultValue={p.heroBio} rows={3} className="field" /></Field>
           <Block label="About narrative"><RichTextEditor name="aboutNarrative" value={p.aboutNarrative} minHeight="14rem" /></Block>
           <Block label="Leadership philosophy"><RichTextEditor name="leadershipPhilosophy" value={p.leadershipPhilosophy} minHeight="10rem" /></Block>

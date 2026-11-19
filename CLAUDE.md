@@ -14,6 +14,7 @@ Next.js (App Router) + TypeScript + Tailwind v4 · Neon Postgres + Drizzle · de
 - APAC map: one JSON document in `site_content` (key `apac_map`: headline stats + items with text, place, highlight, visible and pin x/y in map units), edited in `/admin/map` (drag pins) and rendered by `src/components/ApacMap.tsx` on the home page and `/apac-map` (shareable image, PNG download in the browser). Land shapes: `src/data/apac-map.json` from `scripts/build-apac-map.mjs`; defaults in `src/data/apac-projects.ts`.
 - CV competency boxes live in `skills_and_credentials` and are edited in `/admin/skills` (groups + reorderable items).
 - Book landing text (intro + "still being written" note) is a `site_content` document (key `book_intro`, `src/lib/book-intro.ts`), edited at the top of `/admin/book`.
+- Home hero headline: `profile_settings.hero_headline` (`**words**` get the gradient; empty falls back to `src/lib/hero.ts`), edited in `/admin/profile`.
 - Markdown: `src/components/Markdown.tsx` (react-markdown, gfm, highlight, heading slugs); `src/lib/markdown.ts` (word count, reading time, TOC, section split).
 
 ## Commands

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ApacMap } from "@/components/ApacMap";
 import { ChapterCard } from "@/components/ChapterCard";
@@ -8,20 +9,34 @@ import { Markdown } from "@/components/Markdown";
 import { Portrait } from "@/components/Portrait";
 import { ProjectCard } from "@/components/ProjectCard";
 import { SectionHeader } from "@/components/ui/Section";
-import { getApacDoc, getExperiences, getLatestChapters, getProfile, getProjects } from "@/lib/data";
+import { getApacDoc, getExperiences, getLatestChapters, getProfile, getProjects, getSkills } from "@/lib/data";
+import { personLd, websiteLd } from "@/lib/jsonld";
+import { snippet } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import { yearsBetween } from "@/lib/format";
 import { headlineParts as splitHeadline } from "@/lib/hero";
 import { PrintButton } from "@/components/PrintButton";
 
 export const revalidate = 3600;
 
+export async function generateMetadata(): Promise<Metadata> {
+  const p = await getProfile();
+  const role = p.headline.split("·")[0].trim();
+  return {
+    title: { absolute: `${p.fullName} | ${role}` },
+    description: snippet(p.heroBio),
+    alternates: { canonical: "/" },
+  };
+}
+
 export default async function HomePage() {
-  const [profile, experiences, projects, chapters, apac] = await Promise.all([
+  const [profile, experiences, projects, chapters, apac, skills] = await Promise.all([
     getProfile(),
     getExperiences(),
     getProjects(),
     getLatestChapters(3),
     getApacDoc(),
+    getSkills(),
   ]);
   const featured = projects.filter((p) => p.featuredOnCv);
   const earliest = experiences.reduce((m, e) => (e.startDate < m ? e.startDate : m), "2001-06-01");
@@ -42,6 +57,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={{ "@context": "https://schema.org", "@graph": [personLd(profile, experiences, skills), websiteLd(profile.fullName)] }} />
       {/* ---------------- Hero ---------------- */}
       <section className="relative overflow-hidden">
         <div className="canvas-glow" />

@@ -2,18 +2,26 @@ import type { Metadata, Viewport } from "next";
 import { Footer } from "@/components/Footer";
 import { NavBar } from "@/components/NavBar";
 import { getProfile } from "@/lib/data";
+import { SITE_URL, snippet } from "@/lib/seo";
 import "./globals.css";
 
 export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const p = await getProfile();
+  const role = p.headline.split("·")[0].trim();
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.khaw.cc"),
-    title: { default: `${p.fullName} · ${p.headline.split("·")[0].trim()}`, template: `%s · ${p.fullName}` },
-    description: p.heroBio,
-    openGraph: { title: p.fullName, description: p.headline, type: "website", siteName: p.fullName, url: "/" },
-    twitter: { card: "summary_large_image", title: p.fullName, description: p.headline },
+    metadataBase: new URL(SITE_URL),
+    applicationName: p.fullName,
+    title: { default: `${p.fullName} | ${role}`, template: `%s | ${p.fullName}` },
+    description: snippet(p.heroBio),
+    authors: [{ name: p.fullName, url: SITE_URL }],
+    creator: p.fullName,
+    publisher: p.fullName,
+    openGraph: { type: "website", siteName: p.fullName, locale: "en_US", title: `${p.fullName} | ${role}`, description: snippet(p.heroBio), url: "/" },
+    twitter: { card: "summary_large_image", title: `${p.fullName} | ${role}`, description: snippet(p.heroBio) },
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
+    formatDetection: { telephone: false, email: false, address: false },
   };
 }
 

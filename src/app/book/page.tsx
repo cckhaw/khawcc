@@ -1,20 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
 import { ArrowRight } from "@/components/icons";
 import { Markdown } from "@/components/Markdown";
 import { ChapterBadge } from "@/components/ui/StatusBadge";
-import { getBookIntro, getChapters, getParts } from "@/lib/data";
+import { getBookIntro, getChapters, getParts, getProfile } from "@/lib/data";
+import { absoluteUrl, SITE_URL } from "@/lib/seo";
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
-  title: "Thinking in Signals",
-  description: "A serialized, work-in-progress book on 25 years of telecom, platform engineering and leadership.",
+  title: "Thinking in Signals: a book on telecom, platforms and leadership",
+  description:
+    "Thinking in Signals is a serialized, work-in-progress book on 25 years in telecommunications, platform engineering, leadership and team management.",
+  alternates: { canonical: "/book", types: { "application/rss+xml": "/book/feed.xml" } },
+  openGraph: {
+    type: "book",
+    url: "/book",
+    title: "Thinking in Signals",
+    description: "A serialized, work-in-progress book on 25 years in telecommunications, platform engineering and leadership.",
+  },
 };
 
 const label = (n: string) => (/^\d/.test(n) ? n : n);
 
 export default async function BookPage() {
-  const [parts, all, intro] = await Promise.all([getParts(), getChapters({ includeDrafts: true }), getBookIntro()]);
+  const [parts, all, intro, profile] = await Promise.all([getParts(), getChapters({ includeDrafts: true }), getBookIntro(), getProfile()]);
   const visible = all.filter((c) => c.status !== "draft");
   const first = visible[0];
 
@@ -25,6 +35,20 @@ export default async function BookPage() {
 
   return (
     <div className="relative overflow-hidden">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Book",
+          name: "Thinking in Signals",
+          url: absoluteUrl("/book"),
+          author: { "@type": "Person", "@id": `${SITE_URL}/#person`, name: profile.fullName },
+          description: intro.intro || undefined,
+          genre: "Memoir",
+          inLanguage: "en",
+          numberOfPages: undefined,
+          hasPart: visible.map((c) => ({ "@type": "Chapter", name: c.title, url: absoluteUrl(`/book/${c.slug}`) })),
+        }}
+      />
       <div className="canvas-glow" />
       <div className="mx-auto max-w-4xl px-5 pb-8 pt-14 sm:px-8 md:pt-20">
         <header>

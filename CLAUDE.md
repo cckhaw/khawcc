@@ -15,6 +15,7 @@ Next.js (App Router) + TypeScript + Tailwind v4 · Neon Postgres + Drizzle · de
 - CV competency boxes live in `skills_and_credentials` and are edited in `/admin/skills` (groups + reorderable items).
 - Book landing text (intro + "still being written" note) is a `site_content` document (key `book_intro`, `src/lib/book-intro.ts`), edited at the top of `/admin/book`.
 - Home hero headline: `profile_settings.hero_headline` (`**words**` get the gradient; empty falls back to `src/lib/hero.ts`), edited in `/admin/profile`.
+- SEO: `src/lib/seo.ts` (SITE_URL, snippet), `src/lib/jsonld.ts` + `src/components/JsonLd.tsx` (Person / WebSite / ProfilePage / ItemList / Book / Article JSON-LD), `src/app/robots.ts`, `sitemap.ts` (published chapters only), `book/feed.xml` (RSS), per-page metadata + canonical URLs, `icon.png` / `apple-icon.png` / `favicon.ico`. Drafts and /admin are noindex. Lighthouse target: SEO 100, a11y 100.
 - Markdown: `src/components/Markdown.tsx` (react-markdown, gfm, highlight, heading slugs); `src/lib/markdown.ts` (word count, reading time, TOC, section split).
 
 ## Commands

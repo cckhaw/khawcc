@@ -258,7 +258,7 @@ const proj = (
     Partial<Pick<Project, "description" | "techStack">>,
 ): Project => ({
   logoUrl: `/img/projects/${p.slug}.${LOGO_EXT[p.slug] ?? "svg"}`,
-  description: `${p.tagline}\n\n_Placeholder: refine this description in **/admin/projects**._`,
+  description: "",
   techStack: stack,
   ...p,
   id: i + 1,

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Experience } from "@/db/schema";
 import { fmtPeriod } from "@/lib/format";
 import { ChevronDown } from "./icons";
+import { ProjectLogo } from "./ProjectLogo";
 
 /** Experience rows arrive with Markdown pre-rendered on the server. */
 export type CvRole = Omit<Experience, "summary"> & { summaryNode: React.ReactNode; highlightNodes: React.ReactNode[] };
@@ -60,15 +61,18 @@ export function CvTimeline({ roles }: { roles: CvRole[] }) {
                 } no-print`}
               />
               <article className="glass p-6">
-                <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-1">
-                  <div className="min-w-0">
+                <div className="flex items-start justify-between gap-x-6 gap-y-1">
+                  <div className="flex min-w-0 items-start gap-4">
+                    <ProjectLogo name={r.company} logoUrl={r.logoUrl} size={48} />
+                    <div className="min-w-0">
                     <h3 className="text-lg font-semibold leading-snug tracking-tight">{r.roleTitle}</h3>
                     <p className="mt-0.5 text-sm">
                       <span className="text-accent">{r.company}</span>
                       {r.location && <span className="text-dim"> · {r.location}</span>}
                     </p>
+                    </div>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 text-right">
                     <p className="font-mono text-xs text-muted">{fmtPeriod(r.startDate, r.endDate, r.isCurrent)}</p>
                     <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-dim">{r.domainTag}</p>
                   </div>

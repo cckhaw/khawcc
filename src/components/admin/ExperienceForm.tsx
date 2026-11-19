@@ -1,5 +1,6 @@
 import type { Experience } from "@/db/schema";
 import { saveExperience } from "@/lib/actions/experience";
+import { LogoField } from "./LogoField";
 import { RichTextEditor } from "./RichTextEditor";
 import { Block, Field, SubmitButton } from "./ui";
 
@@ -10,6 +11,7 @@ export function ExperienceForm({ e, tagOptions }: { e?: Experience; tagOptions: 
       <Field label="Role title" className="sm:col-span-2"><input name="roleTitle" defaultValue={e?.roleTitle} required className="field" /></Field>
       <Field label="Company"><input name="company" defaultValue={e?.company} required className="field" /></Field>
       <Field label="Location"><input name="location" defaultValue={e?.location} className="field" /></Field>
+      <div className="sm:col-span-2"><LogoField label="Company logo" defaultValue={e?.logoUrl} fallbackName={e?.company ?? ""} /></div>
       <Field label="Start"><input name="startDate" type="month" defaultValue={e?.startDate.slice(0, 7)} required className="field" /></Field>
       <Field label="End" hint="Ignored when “Current role” is ticked.">
         <input name="endDate" type="month" defaultValue={e?.endDate?.slice(0, 7) ?? ""} className="field" />

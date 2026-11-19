@@ -45,8 +45,16 @@ Great leaders build the best problem-solvers, then measure success by the number
 };
 
 type ExpSeed = Omit<Experience, "id" | "createdAt" | "updatedAt">;
-const exp = (o: Omit<ExpSeed, "sortOrder" | "isVisible">, i: number): Experience => ({
+/** Logos pulled from each employer's own site; blank = initial tile (upload one in /admin). */
+const COMPANY_LOGOS: Record<string, string> = {
+  Maxis: "/img/companies/maxis.png",
+  "M1 Limited": "/img/companies/m1.png",
+  Fortesys: "/img/companies/fortesys.png",
+  "Ruckus Networks": "/img/companies/ruckus.png",
+};
+const exp = (o: Omit<ExpSeed, "sortOrder" | "isVisible" | "logoUrl">, i: number): Experience => ({
   ...o,
+  logoUrl: COMPANY_LOGOS[o.company] ?? "",
   sortOrder: (i + 1) * 10,
   isVisible: true,
   id: i + 1,

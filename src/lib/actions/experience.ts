@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireDb, schema } from "@/db";
 import { requireAdmin } from "@/lib/auth";
+import { isSafeImageUrl } from "@/lib/media";
 import { bool, int, lines, monthToDate, raw, revalidateAll, str } from "./util";
 
 const t = schema.experiences;
@@ -14,6 +15,11 @@ const Input = z.object({
   company: z.string().min(1, "Company is required"),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Start date is required"),
 });
+
+const safeLogo = (u: string) => {
+  if (u && !isSafeImageUrl(u)) throw new Error("Logo must be an https URL or an uploaded image.");
+  return u;
+};
 
 export async function saveExperience(fd: FormData) {
   await requireAdmin();
@@ -28,6 +34,7 @@ export async function saveExperience(fd: FormData) {
   const values = {
     ...base,
     location: str(fd, "location"),
+    logoUrl: safeLogo(str(fd, "logoUrl")),
     endDate: isCurrent ? null : monthToDate(str(fd, "endDate")),
     isCurrent,
     domainTag: str(fd, "domainTag") || "Telco & BSS",

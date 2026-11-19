@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireDb, schema } from "@/db";
 import { PROJECT_CATEGORIES, PROJECT_STATUSES } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import { isSafeImageUrl } from "@/lib/media";
 import { slugify } from "@/lib/markdown";
 import { fetchPageMeta, type PageMeta } from "@/lib/page-meta";
 import { bool, int, raw, revalidateAll, str, tags } from "./util";
@@ -34,7 +35,11 @@ export async function saveProject(fd: FormData) {
   const values = {
     ...base,
     slug,
-    logoUrl: str(fd, "logoUrl"),
+    logoUrl: (() => {
+      const u = str(fd, "logoUrl");
+      if (u && !isSafeImageUrl(u)) throw new Error("Logo must be an https URL or an uploaded image.");
+      return u;
+    })(),
     tagline: str(fd, "tagline"),
     description: raw(fd, "description").trim(),
     techStack: tags(fd, "techStack"),

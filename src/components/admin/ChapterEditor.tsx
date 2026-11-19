@@ -147,7 +147,7 @@ export function ChapterEditor({ chapter, parts, projects }: Props) {
         </div>
 
         <aside className="glass h-fit p-4">
-          <p className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-dim">Sections</p>
+          <p className="mb-3 eyebrow">Sections</p>
           {parsed.sections.length === 0 && <p className="text-xs text-dim">No <code>##</code> sections yet.</p>}
           <ol className="space-y-1">
             {parsed.sections.map((s, i) => (

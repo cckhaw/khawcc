@@ -78,7 +78,7 @@ export default async function ChapterPage({ params }: Props) {
 
           {related.length > 0 && (
             <section className="mt-16" aria-label="Related case studies">
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-dim">Related *.khaw.cc builds</h2>
+              <h2 className="mb-4 text-sm font-semibold tracking-wide text-dim">Related *.khaw.cc builds</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {related.map((p) => (
                   <ProjectCard key={p.id} p={p} compact />
@@ -108,7 +108,7 @@ export default async function ChapterPage({ params }: Props) {
         {toc.length > 1 && (
           <aside className="no-print hidden xl:block">
             <nav className="sticky top-24" aria-label="On this page">
-              <p className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-dim">On this page</p>
+              <p className="mb-3 eyebrow">On this page</p>
               <ul className="space-y-2 border-l border-line pl-4 text-[13px] leading-snug">
                 {toc.map((t) => (
                   <li key={t.id}>

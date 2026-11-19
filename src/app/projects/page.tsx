@@ -23,7 +23,7 @@ export default async function ProjectsPage() {
       <div className="canvas-glow" />
       <div className="mx-auto max-w-6xl px-5 pb-8 pt-14 sm:px-8 md:pt-20">
         <header className="mb-12 max-w-2xl">
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-dim">The Lab</p>
+          <p className="eyebrow">The Lab</p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
             <span className="text-gradient">*.khaw.cc</span> projects
           </h1>

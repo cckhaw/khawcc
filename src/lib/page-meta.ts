@@ -2,7 +2,7 @@ import "server-only";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 
-export type PageMeta = { title: string; description: string };
+export type PageMeta = { title: string; description: string; icon: string };
 
 function isPrivate(ip: string): boolean {
   if (ip.includes(":")) {
@@ -39,6 +39,27 @@ function metaContent(html: string, key: string): string {
   return c ? decode(c[1]) : "";
 }
 
+/** Best icon from <link rel="icon|apple-touch-icon">: SVG, then touch icon, then PNG, then anything. */
+function pickIcon(html: string, base: URL): string {
+  const links = [...html.matchAll(/<link\b[^>]*>/gi)]
+    .map((m) => m[0])
+    .filter((t) => /rel=["'][^"']*icon[^"']*["']/i.test(t))
+    .map((t) => ({
+      href: /href=["']([^"']+)["']/i.exec(t)?.[1] ?? "",
+      type: /type=["']([^"']+)["']/i.exec(t)?.[1] ?? "",
+      touch: /apple-touch-icon/i.test(t),
+    }))
+    .filter((l) => l.href);
+  const score = (l: (typeof links)[number]) =>
+    /svg/i.test(l.type) || /\.svg(\?|$)/i.test(l.href) ? 4 : l.touch ? 3 : /png/i.test(l.type) || /\.png(\?|$)/i.test(l.href) ? 2 : 1;
+  const best = links.sort((a, b) => score(b) - score(a))[0];
+  try {
+    return best ? new URL(decode(best.href), base).toString() : new URL("/favicon.ico", base).toString();
+  } catch {
+    return "";
+  }
+}
+
 /** Fetch a page (SSRF-guarded, size/time limited) and pull title + description. */
 export async function fetchPageMeta(input: string): Promise<PageMeta> {
   let url = new URL(input);
@@ -71,7 +92,7 @@ export async function fetchPageMeta(input: string): Promise<PageMeta> {
     const title = metaContent(html, "og:title") || decode(/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1] ?? "");
     const description = metaContent(html, "og:description") || metaContent(html, "description");
     if (!title && !description) throw new Error("No title or description found on that page.");
-    return { title, description };
+    return { title, description, icon: pickIcon(html, url) };
   }
   throw new Error("Too many redirects.");
 }

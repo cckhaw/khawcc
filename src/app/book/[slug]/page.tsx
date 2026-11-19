@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { JsonLd } from "@/components/JsonLd";
 import { ChapterMediaSection } from "@/components/ChapterMedia";
 import { Markdown } from "@/components/Markdown";
 import { ProjectCard } from "@/components/ProjectCard";
 import { ReaderChrome } from "@/components/ReaderChrome";
 import { ChapterBadge } from "@/components/ui/StatusBadge";
 import { isAdmin } from "@/lib/auth";
-import { getChapterBySlug, getChapters, getProjectsBySlugs } from "@/lib/data";
+import { getChapterBySlug, getChapters, getProfile, getProjectsBySlugs } from "@/lib/data";
+import { absoluteUrl, SITE_URL, snippet } from "@/lib/seo";
 import { extractToc } from "@/lib/markdown";
 
 // Reads the admin cookie (draft preview), so this route renders per request.
@@ -18,7 +20,25 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const c = await getChapterBySlug(slug, { includeDrafts: await isAdmin() });
-  return c ? { title: `${c.title} · Thinking in Signals`, description: c.summary || undefined } : {};
+  if (!c) return {};
+  const label = /^\d/.test(c.chapterNumber) ? `Chapter ${c.chapterNumber}` : c.chapterNumber;
+  const description = snippet(c.summary || c.contentMarkdown, 158);
+  return {
+    title: c.title === c.chapterNumber ? `${c.title} | Thinking in Signals` : `${c.title} (${label}) | Thinking in Signals`,
+    description,
+    alternates: { canonical: `/book/${c.slug}` },
+    // Draft previews (admin only) must never be indexed.
+    robots: c.status === "draft" ? { index: false, follow: false } : undefined,
+    openGraph: {
+      type: "article",
+      url: `/book/${c.slug}`,
+      title: `${c.title} | Thinking in Signals`,
+      description,
+      publishedTime: (c.publishedAt ?? c.createdAt).toISOString(),
+      modifiedTime: c.updatedAt.toISOString(),
+      section: "Thinking in Signals",
+    },
+  };
 }
 
 export default async function ChapterPage({ params }: Props) {
@@ -27,9 +47,10 @@ export default async function ChapterPage({ params }: Props) {
   const chapter = await getChapterBySlug(slug, { includeDrafts: admin });
   if (!chapter) notFound();
 
-  const [all, related] = await Promise.all([
+  const [all, related, profile] = await Promise.all([
     getChapters({ includeDrafts: admin }),
     getProjectsBySlugs(chapter.relatedProjectSlugs),
+    getProfile(),
   ]);
   const idx = all.findIndex((c) => c.id === chapter.id);
   const prev = idx > 0 ? all[idx - 1] : undefined;
@@ -37,8 +58,38 @@ export default async function ChapterPage({ params }: Props) {
   const toc = extractToc(chapter.contentMarkdown).filter((t) => t.level === 2 && !/how to use this signal/i.test(t.text));
   const numbered = /^\d/.test(chapter.chapterNumber);
 
+  const url = absoluteUrl(`/book/${chapter.slug}`);
   return (
     <div className="mx-auto max-w-6xl px-5 pb-8 pt-10 sm:px-8 md:pt-14">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Article",
+              "@id": `${url}#article`,
+              headline: chapter.title,
+              description: snippet(chapter.summary || chapter.contentMarkdown, 200),
+              url,
+              mainEntityOfPage: url,
+              datePublished: (chapter.publishedAt ?? chapter.createdAt).toISOString(),
+              dateModified: chapter.updatedAt.toISOString(),
+              inLanguage: "en",
+              wordCount: chapter.contentMarkdown.split(/\s+/).length,
+              author: { "@type": "Person", "@id": `${SITE_URL}/#person`, name: profile.fullName },
+              isPartOf: { "@type": "Book", name: "Thinking in Signals", url: absoluteUrl("/book") },
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+                { "@type": "ListItem", position: 2, name: "Thinking in Signals", item: absoluteUrl("/book") },
+                { "@type": "ListItem", position: 3, name: chapter.title, item: url },
+              ],
+            },
+          ],
+        }}
+      />
       {chapter.status === "draft" && (
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-warn/40 bg-warn/10 px-5 py-3 text-sm text-warn">
           <span>Draft preview: only visible to you while signed in as admin.</span>

@@ -15,7 +15,7 @@ const makeCss = (n: number) => {
     `.apac:has(.pin-${i}:hover) .leg-${i},.apac .leg-${i}:hover{background:var(--apac-box)}`,
   ).join("");
   return `
-.apac{--apac-land:#7aaed6;--apac-line:#fff;--apac-ink:#0d4664;--apac-soft:#3b6178;--apac-box:#dceaf7;--apac-sea:#e9f2fa;--apac-pin:#3a4350;--apac-hot:#d8482c;color:var(--apac-ink)}
+.apac{--apac-land:#7aaed6;--apac-line:#fff;--apac-ink:#0d4664;--apac-soft:#2f566d;--apac-box:#dceaf7;--apac-sea:#e9f2fa;--apac-pin:#3a4350;--apac-hot:#c43c22;color:var(--apac-ink)}
 :root[data-theme="dark"] .apac-site{--apac-land:#3d6283;--apac-line:#14110f;--apac-ink:#e8f1f8;--apac-soft:#a9bfd0;--apac-box:rgba(122,174,214,.14);--apac-sea:rgba(122,174,214,.07);--apac-pin:#f4eee7;--apac-hot:#ff8a66}
 .apac .pin-body{transform-box:fill-box;transform-origin:50% 100%;transition:transform .18s ease}
 .apac .leg{transition:background .15s,box-shadow .15s}

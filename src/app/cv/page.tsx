@@ -3,11 +3,29 @@ import { CvTimeline, type CvRole } from "@/components/CvTimeline";
 import { PrintIcon } from "@/components/icons";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { Markdown } from "@/components/Markdown";
+import { JsonLd } from "@/components/JsonLd";
 import { PrintButton } from "@/components/PrintButton";
 import { getExperiences, getProfile, getSkills } from "@/lib/data";
+import { personLd } from "@/lib/jsonld";
+import { absoluteUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
-export const metadata: Metadata = { title: "Experience (CV)" };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const p = await getProfile();
+  const role = p.headline.split("·")[0].trim();
+  return {
+    title: "Experience & CV",
+    description: `Career history, competencies and achievements of ${p.fullName}, ${role}: from technical support to leading enterprise platform and business transformations.`,
+    alternates: { canonical: "/cv" },
+    openGraph: {
+      type: "profile",
+      url: "/cv",
+      title: `Experience & CV | ${p.fullName}`,
+      description: `Career history, competencies and achievements of ${p.fullName}.`,
+    },
+  };
+}
 
 export default async function CvPage() {
   const [profile, experiences, skills] = await Promise.all([getProfile(), getExperiences(), getSkills()]);
@@ -21,6 +39,7 @@ export default async function CvPage() {
 
   return (
     <div className="relative overflow-hidden">
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "ProfilePage", url: absoluteUrl("/cv"), name: `${profile.fullName}: CV`, mainEntity: personLd(profile, experiences, skills) }} />
       <div className="canvas-glow" />
       <div className="mx-auto max-w-4xl px-5 pb-8 pt-14 sm:px-8 md:pt-20">
         <header className="mb-12">

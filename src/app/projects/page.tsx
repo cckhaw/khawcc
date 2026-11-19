@@ -1,13 +1,22 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/JsonLd";
 import { ProjectCard } from "@/components/ProjectCard";
 import { ProjectFilter } from "@/components/ProjectFilter";
 import { PROJECT_CATEGORIES } from "@/db/schema";
 import { getProjects } from "@/lib/data";
+import { absoluteUrl, snippet } from "@/lib/seo";
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Projects (*.khaw.cc)",
-  description: "A growing ecosystem of production apps shipped on *.khaw.cc.",
+  description: "A growing ecosystem of production web apps and platforms built and shipped on khaw.cc, from plan comparison to endurance-sports analytics, SaaS and games.",
+  alternates: { canonical: "/projects" },
+  openGraph: {
+    type: "website",
+    url: "/projects",
+    title: "Projects (*.khaw.cc)",
+    description: "A growing ecosystem of production web apps and platforms built and shipped on khaw.cc.",
+  },
 };
 
 export default async function ProjectsPage() {
@@ -20,6 +29,26 @@ export default async function ProjectsPage() {
 
   return (
     <div className="relative overflow-hidden">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "khaw.cc projects",
+          url: absoluteUrl("/projects"),
+          itemListElement: projects.map((p, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            item: {
+              "@type": "WebApplication",
+              name: p.name,
+              url: p.url,
+              description: snippet(p.tagline || p.description || p.name, 200),
+              applicationCategory: p.category,
+              operatingSystem: "Web",
+            },
+          })),
+        }}
+      />
       <div className="canvas-glow" />
       <div className="mx-auto max-w-6xl px-5 pb-8 pt-14 sm:px-8 md:pt-20">
         <header className="mb-12 max-w-2xl">
@@ -38,7 +67,7 @@ export default async function ProjectsPage() {
             id: p.id,
             category: p.category,
             status: p.status,
-            node: <ProjectCard p={p} />,
+            node: <ProjectCard p={p} headingLevel={2} />,
           }))}
         />
       </div>

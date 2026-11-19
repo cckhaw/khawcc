@@ -5,14 +5,15 @@ import { Markdown } from "./Markdown";
 import { ProjectLogo } from "./ProjectLogo";
 import { StatusBadge } from "./ui/StatusBadge";
 
-export function ProjectCard({ p, compact = false }: { p: Project; compact?: boolean }) {
+export function ProjectCard({ p, compact = false, headingLevel = 3 }: { p: Project; compact?: boolean; headingLevel?: 2 | 3 }) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
     <article className="glass glass-hover flex h-full flex-col p-6">
       <div className="mb-4 flex items-start justify-between gap-3">
         <ProjectLogo name={p.name} logoUrl={p.logoUrl} />
         <StatusBadge status={p.status} />
       </div>
-      <h3 className="text-xl font-semibold tracking-tight">{p.name}</h3>
+      <Heading className="text-xl font-semibold tracking-tight">{p.name}</Heading>
       <p className="mt-0.5 font-mono text-[11px] text-dim">{hostOf(p.url)}</p>
       <p className="mt-2 text-sm text-muted">{p.tagline}</p>
       {!compact && p.description && (

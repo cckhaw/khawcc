@@ -1,0 +1,61 @@
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+import * as schema from "./schema";
+import { seedChapters, seedExperiences, seedParts, seedProfile, seedProjects, seedSkills } from "./seed-data";
+
+/**
+ * Idempotent seed: safe to run repeatedly.
+ *  - profile / projects / parts / chapters: inserted only if missing (matched by id / slug / part number),
+ *    so edits made in /admin are never overwritten.
+ *  - experiences / skills: seeded only when their table is empty.
+ */
+async function main() {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error("DATABASE_URL is required to seed.");
+  const db = drizzle(neon(url), { schema });
+
+  await db.insert(schema.profileSettings).values(seedProfile).onConflictDoNothing();
+
+  const [anyExp] = await db.select({ id: schema.experiences.id }).from(schema.experiences).limit(1);
+  if (!anyExp) {
+    await db.insert(schema.experiences).values(seedExperiences.map(({ id, createdAt, updatedAt, ...r }) => (void [id, createdAt, updatedAt], r)));
+    console.log(`+ ${seedExperiences.length} experiences`);
+  } else console.log("= experiences already present");
+
+  const [anySkill] = await db.select({ id: schema.skillsAndCredentials.id }).from(schema.skillsAndCredentials).limit(1);
+  if (!anySkill) {
+    await db.insert(schema.skillsAndCredentials).values(seedSkills.map(({ id, createdAt, updatedAt, ...r }) => (void [id, createdAt, updatedAt], r)));
+    console.log(`+ ${seedSkills.length} skill groups`);
+  } else console.log("= skills already present");
+
+  await db
+    .insert(schema.projects)
+    .values(seedProjects.map(({ id, createdAt, updatedAt, ...r }) => (void [id, createdAt, updatedAt], r)))
+    .onConflictDoNothing({ target: schema.projects.slug });
+  console.log(`✓ projects (${seedProjects.length} ensured)`);
+
+  await db
+    .insert(schema.bookParts)
+    .values(seedParts.map(({ id, createdAt, updatedAt, ...r }) => (void [id, createdAt, updatedAt], r)))
+    .onConflictDoNothing({ target: schema.bookParts.partNumber });
+  const parts = await db.select().from(schema.bookParts);
+  const partIdByNumber = new Map(parts.map((p) => [p.partNumber, p.id]));
+  const seedPartNumber = new Map(seedParts.map((p) => [p.id, p.partNumber]));
+
+  await db
+    .insert(schema.bookChapters)
+    .values(
+      seedChapters.map(({ id, createdAt, updatedAt, partId, ...r }) => {
+        void [id, createdAt, updatedAt];
+        return { ...r, partId: partId ? (partIdByNumber.get(seedPartNumber.get(partId)!) ?? null) : null };
+      }),
+    )
+    .onConflictDoNothing({ target: schema.bookChapters.slug });
+  console.log(`✓ book (${seedParts.length} parts, ${seedChapters.length} chapters ensured)`);
+  console.log("Seed complete.");
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

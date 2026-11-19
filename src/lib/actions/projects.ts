@@ -34,6 +34,7 @@ export async function saveProject(fd: FormData) {
   const values = {
     ...base,
     slug,
+    logoUrl: str(fd, "logoUrl"),
     tagline: str(fd, "tagline"),
     description: raw(fd, "description").trim(),
     techStack: tags(fd, "techStack"),

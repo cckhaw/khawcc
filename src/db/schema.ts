@@ -71,6 +71,8 @@ export const projects = pgTable(
     name: text("name").notNull(),
     url: text("url").notNull(),
     category: varchar("category", { length: 64 }).$type<ProjectCategory>().notNull(),
+    /** Icon/logo shown on cards: https URL or /public path. Empty = initial-letter tile. */
+    logoUrl: text("logo_url").notNull().default(""),
     tagline: text("tagline").notNull().default(""),
     description: text("description").notNull().default(""),
     techStack: jsonb("tech_stack").$type<string[]>().notNull().default([]),

@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { and, eq, like } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 import { seedChapters, seedExperiences, seedParts, seedProfile, seedProjects, seedSkills } from "./seed-data";
@@ -32,6 +33,18 @@ async function main() {
     .insert(schema.projects)
     .values(seedProjects.map(({ id, createdAt, updatedAt, ...r }) => (void [id, createdAt, updatedAt], r)))
     .onConflictDoNothing({ target: schema.projects.slug });
+  // Backfill logos on existing rows only where none is set (never overwrites admin edits).
+  for (const p of seedProjects) {
+    await db
+      .update(schema.projects)
+      .set({ logoUrl: p.logoUrl })
+      .where(and(eq(schema.projects.slug, p.slug), eq(schema.projects.logoUrl, "")));
+  }
+  // Drop the old visible "Placeholder" blurb (it just repeated the tagline); real descriptions are untouched.
+  await db
+    .update(schema.projects)
+    .set({ description: "" })
+    .where(like(schema.projects.description, "%Placeholder: refine this description%"));
   console.log(`✓ projects (${seedProjects.length} ensured)`);
 
   await db

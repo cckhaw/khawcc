@@ -26,6 +26,7 @@ export function ProjectForm({ p }: { p?: Project }) {
       fill("name", r.title.split(/\s[|\-–·:]\s/)[0].trim());
       fill("tagline", r.description.length > 140 ? r.description.slice(0, 137).trimEnd() + "…" : r.description);
       fill("description", r.description);
+      fill("logoUrl", r.icon);
       setMsg(`Prefilled empty fields from “${r.title || url}”.`);
     });
   }
@@ -53,6 +54,9 @@ export function ProjectForm({ p }: { p?: Project }) {
         <select name="status" defaultValue={p?.status ?? "live"} className="field">
           {PROJECT_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
+      </Field>
+      <Field label="Logo / icon URL" hint="Filled by “Fetch meta”. Use a full https URL or a /public path. Blank shows an initial." className="sm:col-span-2">
+        <input name="logoUrl" defaultValue={p?.logoUrl} className="field font-mono text-[13px]" />
       </Field>
       <Field label="Tagline" className="sm:col-span-2"><input name="tagline" defaultValue={p?.tagline} className="field" /></Field>
       <Field label="Description (Markdown)" className="sm:col-span-2"><textarea name="description" rows={4} defaultValue={p?.description} className="field" /></Field>

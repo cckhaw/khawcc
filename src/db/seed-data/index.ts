@@ -250,12 +250,14 @@ export const seedSkills: SkillGroup[] = [
   },
 ];
 
+const LOGO_EXT: Record<string, string> = { meridian: "png", plansifu: "png", splitline: "png" };
 const stack = ["Next.js", "TypeScript", "Tailwind CSS", "Neon Postgres"];
 const proj = (
   i: number,
   p: Pick<Project, "slug" | "name" | "url" | "category" | "tagline" | "status" | "featuredOnCv"> &
     Partial<Pick<Project, "description" | "techStack">>,
 ): Project => ({
+  logoUrl: `/img/projects/${p.slug}.${LOGO_EXT[p.slug] ?? "svg"}`,
   description: `${p.tagline}\n\n_Placeholder: refine this description in **/admin/projects**._`,
   techStack: stack,
   ...p,

@@ -2,19 +2,19 @@ import type { Project } from "@/db/schema";
 import { hostOf } from "@/lib/format";
 import { ArrowUpRight } from "./icons";
 import { Markdown } from "./Markdown";
+import { ProjectLogo } from "./ProjectLogo";
 import { StatusBadge } from "./ui/StatusBadge";
 
 export function ProjectCard({ p, compact = false }: { p: Project; compact?: boolean }) {
   return (
     <article className="glass glass-hover flex h-full flex-col p-6">
       <div className="mb-4 flex items-start justify-between gap-3">
-        <span className="rounded-md border border-line bg-card px-2 py-1 font-mono text-[11px] text-muted">
-          {hostOf(p.url)}
-        </span>
+        <ProjectLogo name={p.name} logoUrl={p.logoUrl} />
         <StatusBadge status={p.status} />
       </div>
       <h3 className="text-xl font-semibold tracking-tight">{p.name}</h3>
-      <p className="mt-1.5 text-sm text-muted">{p.tagline}</p>
+      <p className="mt-0.5 font-mono text-[11px] text-dim">{hostOf(p.url)}</p>
+      <p className="mt-2 text-sm text-muted">{p.tagline}</p>
       {!compact && p.description && (
         <Markdown className="prose-compact mt-4 text-muted">{p.description}</Markdown>
       )}

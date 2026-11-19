@@ -1,5 +1,6 @@
 import { ProjectForm } from "@/components/admin/ProjectForm";
 import { ConfirmButton } from "@/components/admin/ui";
+import { ProjectLogo } from "@/components/ProjectLogo";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { deleteProject } from "@/lib/actions/projects";
 import { requireAdmin } from "@/lib/auth";
@@ -25,6 +26,7 @@ export default async function AdminProjects({ searchParams }: { searchParams: Pr
         {rows.map((p) => (
           <li key={p.id} className="glass p-4">
             <div className="flex flex-wrap items-center gap-3">
+              <ProjectLogo name={p.name} logoUrl={p.logoUrl} size={36} />
               <div className="min-w-0 flex-1">
                 <p className="font-medium">{p.name} <span className="font-mono text-xs text-dim">/{p.slug} · #{p.sortOrder}</span></p>
                 <p className="truncate text-sm text-muted">{p.category} · {p.url}{p.featuredOnCv ? " · ★ featured" : ""}</p>

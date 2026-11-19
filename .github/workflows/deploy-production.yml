@@ -32,6 +32,17 @@ jobs:
       - name: Pull Vercel production environment
         run: npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
 
+      - name: Migrate and seed the Neon database
+        run: |
+          set -a; . .vercel/.env.production.local; set +a
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "DATABASE_URL is missing from the Vercel Production environment (connect Neon to the project)."; exit 1
+          fi
+          # Migrations prefer Neon's direct (unpooled) connection when the integration provides one.
+          DATABASE_URL="${DATABASE_URL_UNPOOLED:-$DATABASE_URL}" npm run db:migrate
+          # Idempotent: inserts missing content only, never overwrites edits made in /admin.
+          npm run db:seed
+
       - name: Build
         run: npx vercel@latest build --prod --token="$VERCEL_TOKEN"
 

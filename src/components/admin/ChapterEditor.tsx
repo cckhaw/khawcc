@@ -7,8 +7,8 @@ import { saveChapter } from "@/lib/actions/book";
 import { CHAPTER_STATUS_LABEL } from "@/lib/format";
 import { joinSections, readingTime, slugify, splitSections, wordCount } from "@/lib/markdown";
 import { ArrowDown, ArrowUp } from "../icons";
-import { Markdown } from "../Markdown";
 import { MediaPanel } from "./MediaPanel";
+import { RichTextEditor, type RichTextHandle } from "./RichTextEditor";
 import { Field, SubmitButton } from "./ui";
 
 type Props = {
@@ -22,55 +22,35 @@ export function ChapterEditor({ chapter, parts, projects }: Props) {
   const [title, setTitle] = useState(chapter?.title ?? "");
   const [slug, setSlug] = useState(chapter?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(chapter));
-  const [tab, setTab] = useState<"split" | "write" | "preview">("split");
   const [newSection, setNewSection] = useState("");
-  const area = useRef<HTMLTextAreaElement>(null);
+  const editor = useRef<RichTextHandle>(null);
 
   const words = useMemo(() => wordCount(content), [content]);
   const minutes = useMemo(() => readingTime(content), [content]);
   const parsed = useMemo(() => splitSections(content), [content]);
 
+  const apply = (md: string) => {
+    setContent(md);
+    editor.current?.setMarkdown(md);
+  };
   function moveSection(i: number, dir: -1 | 1) {
     const j = i + dir;
     if (j < 0 || j >= parsed.sections.length) return;
     const s = [...parsed.sections];
     [s[i], s[j]] = [s[j], s[i]];
-    setContent(joinSections(parsed.intro, s));
+    apply(joinSections(parsed.intro, s));
   }
   function removeSection(i: number) {
     if (!window.confirm(`Remove section “${parsed.sections[i].heading}” and its text?`)) return;
-    setContent(joinSections(parsed.intro, parsed.sections.filter((_, k) => k !== i)));
+    apply(joinSections(parsed.intro, parsed.sections.filter((_, k) => k !== i)));
   }
   function addSection() {
     const h = newSection.trim();
     if (!h) return;
-    setContent(joinSections(parsed.intro, [...parsed.sections, { heading: h, level: 2, body: "" }]));
+    apply(joinSections(parsed.intro, [...parsed.sections, { heading: h, level: 2, body: "" }]));
     setNewSection("");
   }
-  function insertAtCursor(md: string) {
-    const el = area.current;
-    const at = el ? el.selectionStart : content.length;
-    setContent((c) => c.slice(0, at) + md + c.slice(at));
-  }
-  function jumpTo(heading: string) {
-    const el = area.current;
-    if (!el) return;
-    const idx = content.indexOf(`## ${heading}`);
-    if (idx < 0) return;
-    setTab((t) => (t === "preview" ? "split" : t));
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(idx, idx);
-      const lineHeight = 22;
-      el.scrollTop = Math.max(0, content.slice(0, idx).split("\n").length - 2) * lineHeight;
-    });
-  }
-
-  const tabBtn = (k: typeof tab, l: string) => (
-    <button type="button" onClick={() => setTab(k)} aria-pressed={tab === k} className={`rounded-full px-3 py-1 text-xs ${tab === k ? "bg-fg text-bg" : "text-muted hover:text-fg"}`}>
-      {l}
-    </button>
-  );
+  const jumpTo = (heading: string) => editor.current?.jumpTo(heading);
 
   return (
     <form action={saveChapter} className="space-y-6">
@@ -130,26 +110,17 @@ export function ChapterEditor({ chapter, parts, projects }: Props) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_16rem]">
-        <div className="glass overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-            <div className="flex gap-1">{tabBtn("split", "Split")}{tabBtn("write", "Write")}{tabBtn("preview", "Preview")}</div>
-            <p className="font-mono text-xs text-dim">{words.toLocaleString()} words · {minutes} min read</p>
-          </div>
-          <div className={`grid ${tab === "split" ? "md:grid-cols-2 md:divide-x md:divide-[var(--line)]" : ""}`}>
-            <textarea
-              ref={area}
-              name="contentMarkdown"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              spellCheck
-              aria-label="Markdown content"
-              className={`h-[70vh] w-full resize-none bg-transparent p-5 font-mono text-[13px] leading-[22px] outline-none ${tab === "preview" ? "hidden" : ""}`}
-              placeholder="Write in Markdown. Use ## for sections."
-            />
-            <div className={`h-[70vh] overflow-y-auto p-6 ${tab === "write" ? "hidden" : ""}`}>
-              <Markdown className="prose-compact">{content || "_Nothing to preview yet._"}</Markdown>
-            </div>
-          </div>
+        <div>
+          <RichTextEditor
+            ref={editor}
+            name="contentMarkdown"
+            value={chapter?.contentMarkdown ?? ""}
+            onChange={setContent}
+            allowSplit
+            minHeight="65vh"
+            placeholder="Start writing your chapter…"
+          />
+          <p className="mt-2 text-right font-mono text-xs text-dim">{words.toLocaleString()} words · {minutes} min read</p>
         </div>
 
         <aside className="glass h-fit p-4">
@@ -174,7 +145,7 @@ export function ChapterEditor({ chapter, parts, projects }: Props) {
         </aside>
       </div>
 
-      <MediaPanel initial={chapter?.media ?? []} onInsert={insertAtCursor} />
+      <MediaPanel initial={chapter?.media ?? []} onInsert={(md) => editor.current?.insertMarkdown(md)} />
 
       <div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 rounded-full border border-line bg-[var(--nav)] px-4 py-3 backdrop-blur-xl">
         <SubmitButton name="intent" value="save">Save chapter</SubmitButton>

@@ -1,6 +1,7 @@
 import type { Experience } from "@/db/schema";
 import { saveExperience } from "@/lib/actions/experience";
-import { Field, SubmitButton } from "./ui";
+import { RichTextEditor } from "./RichTextEditor";
+import { Block, Field, SubmitButton } from "./ui";
 
 export function ExperienceForm({ e, tagOptions }: { e?: Experience; tagOptions: string[] }) {
   return (
@@ -21,10 +22,8 @@ export function ExperienceForm({ e, tagOptions }: { e?: Experience; tagOptions: 
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isCurrent" defaultChecked={e?.isCurrent} /> Current role</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="isVisible" defaultChecked={e?.isVisible ?? true} /> Visible</label>
       </div>
-      <Field label="Summary (Markdown)" className="sm:col-span-2"><textarea name="summary" rows={3} defaultValue={e?.summary} className="field" /></Field>
-      <Field label="Highlights" hint="One bullet per line." className="sm:col-span-2">
-        <textarea name="highlights" rows={6} defaultValue={e?.highlights.join("\n")} className="field" />
-      </Field>
+      <Block label="Summary" className="sm:col-span-2"><RichTextEditor name="summary" value={e?.summary ?? ""} minHeight="6rem" variant="basic" /></Block>
+      <Block label="Achievements" hint="One bullet per achievement. Use B for bold." className="sm:col-span-2"><RichTextEditor name="highlights" value={(e?.highlights ?? []).map((h) => `- ${h}`).join("\n")} minHeight="8rem" variant="basic" placeholder="Add achievements as a bulleted list…" /></Block>
       <div className="sm:col-span-2"><SubmitButton>{e ? "Save role" : "Add role"}</SubmitButton></div>
     </form>
   );

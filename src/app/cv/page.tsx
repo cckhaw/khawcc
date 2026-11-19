@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CvTimeline, type CvRole } from "@/components/CvTimeline";
 import { PrintIcon } from "@/components/icons";
+import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { Markdown } from "@/components/Markdown";
 import { PrintButton } from "@/components/PrintButton";
 import { getExperiences, getProfile, getSkills } from "@/lib/data";
@@ -12,6 +13,7 @@ export default async function CvPage() {
   const [profile, experiences, skills] = await Promise.all([getProfile(), getExperiences(), getSkills()]);
   const roles: CvRole[] = experiences.map(({ summary, ...e }) => ({
     ...e,
+    highlightNodes: e.highlights.map((h) => <InlineMarkdown key={h}>{h}</InlineMarkdown>),
     summaryNode: summary ? <Markdown className="prose-compact">{summary}</Markdown> : null,
   }));
   const groups = skills.filter((s) => s.items.length > 0);

@@ -4,10 +4,12 @@ import { useRef, useState, useTransition } from "react";
 import { PROJECT_CATEGORIES, PROJECT_STATUSES } from "@/db/constants";
 import type { Project } from "@/db/schema";
 import { fetchMetaAction, saveProject } from "@/lib/actions/projects";
-import { Field, SubmitButton } from "./ui";
+import { RichTextEditor, type RichTextHandle } from "./RichTextEditor";
+import { Block, Field, SubmitButton } from "./ui";
 
 export function ProjectForm({ p }: { p?: Project }) {
   const ref = useRef<HTMLFormElement>(null);
+  const descRef = useRef<RichTextHandle>(null);
   const [msg, setMsg] = useState<string>("");
   const [busy, start] = useTransition();
 
@@ -25,7 +27,8 @@ export function ProjectForm({ p }: { p?: Project }) {
       if ("error" in r) return setMsg(r.error);
       fill("name", r.title.split(/\s[|\-–·:]\s/)[0].trim());
       fill("tagline", r.description.length > 140 ? r.description.slice(0, 137).trimEnd() + "…" : r.description);
-      fill("description", r.description);
+      const descEl = ref.current?.elements.namedItem("description") as HTMLInputElement | null;
+      if (r.description && !descEl?.value.trim()) descRef.current?.setMarkdown(r.description);
       fill("logoUrl", r.icon);
       setMsg(`Prefilled empty fields from “${r.title || url}”.`);
     });
@@ -59,7 +62,7 @@ export function ProjectForm({ p }: { p?: Project }) {
         <input name="logoUrl" defaultValue={p?.logoUrl} className="field font-mono text-[13px]" />
       </Field>
       <Field label="Tagline" className="sm:col-span-2"><input name="tagline" defaultValue={p?.tagline} className="field" /></Field>
-      <Field label="Description (Markdown)" className="sm:col-span-2"><textarea name="description" rows={4} defaultValue={p?.description} className="field" /></Field>
+      <Block label="Description" className="sm:col-span-2"><RichTextEditor ref={descRef} name="description" value={p?.description ?? ""} minHeight="8rem" /></Block>
       <Field label="Tech stack" hint="Comma-separated tags." className="sm:col-span-2"><input name="techStack" defaultValue={p?.techStack.join(", ")} className="field" /></Field>
       <Field label="Sort order" hint="Lower numbers first."><input name="sortOrder" type="number" defaultValue={p?.sortOrder ?? 100} className="field" /></Field>
       <label className="flex items-center gap-2 pt-7 text-sm"><input type="checkbox" name="featuredOnCv" defaultChecked={p?.featuredOnCv} /> Featured on CV / home</label>

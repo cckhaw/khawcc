@@ -1,4 +1,5 @@
-import { Field, SubmitButton } from "@/components/admin/ui";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { Block, Field, SubmitButton } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/auth";
 import { getProfile } from "@/lib/data";
 import { saveProfile } from "@/lib/actions/profile";
@@ -25,9 +26,9 @@ export default async function AdminProfile({ searchParams }: { searchParams: Pro
         </div>
         <div className="glass space-y-4 p-6">
           <Field label="Hero bio"><textarea name="heroBio" defaultValue={p.heroBio} rows={3} className="field" /></Field>
-          <Field label="About narrative (Markdown)"><textarea name="aboutNarrative" defaultValue={p.aboutNarrative} rows={10} className="field font-mono text-[13px]" /></Field>
-          <Field label="Leadership philosophy (Markdown)"><textarea name="leadershipPhilosophy" defaultValue={p.leadershipPhilosophy} rows={6} className="field font-mono text-[13px]" /></Field>
-          <Field label="Currently focused on (Markdown)"><textarea name="currentlyFocusedOn" defaultValue={p.currentlyFocusedOn} rows={5} className="field font-mono text-[13px]" /></Field>
+          <Block label="About narrative"><RichTextEditor name="aboutNarrative" value={p.aboutNarrative} minHeight="14rem" /></Block>
+          <Block label="Leadership philosophy"><RichTextEditor name="leadershipPhilosophy" value={p.leadershipPhilosophy} minHeight="10rem" /></Block>
+          <Block label="Currently focused on"><RichTextEditor name="currentlyFocusedOn" value={p.currentlyFocusedOn} minHeight="8rem" variant="basic" /></Block>
         </div>
         <SubmitButton>Save profile</SubmitButton>
       </form>

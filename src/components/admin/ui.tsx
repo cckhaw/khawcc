@@ -61,3 +61,14 @@ export function Field({
     </label>
   );
 }
+
+/** Like Field, but a <div>: use for rich editors, whose toolbar buttons must not sit inside a <label>. */
+export function Block({ label, hint, children, className = "" }: { label: string; hint?: string; children: ReactNode; className?: string }) {
+  return (
+    <div className={className} role="group" aria-label={label}>
+      <span className="mb-1.5 block text-[13px] font-medium text-muted">{label}</span>
+      {children}
+      {hint && <span className="mt-1 block text-xs text-dim">{hint}</span>}
+    </div>
+  );
+}

@@ -22,6 +22,13 @@
       "when": 1795065600275,
       "tag": "0002_publish_all_chapters",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795065890900,
+      "tag": "0003_chapter_media",
+      "breakpoints": true
     }
   ]
 }

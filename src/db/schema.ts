@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
+import type { ChapterMedia } from "../lib/media";
 import type { ChapterStatus, ProjectCategory, ProjectStatus, SkillCategory } from "./constants";
 
 export * from "./constants";
@@ -114,6 +115,8 @@ export const bookChapters = pgTable(
     contentMarkdown: text("content_markdown").notNull().default(""),
     readingTimeMinutes: integer("reading_time_minutes").notNull().default(1),
     relatedProjectSlugs: jsonb("related_project_slugs").$type<string[]>().notNull().default([]),
+    /** Pictures and YouTube links shown alongside the chapter. */
+    media: jsonb("media").$type<ChapterMedia[]>().notNull().default([]),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: updatedAt(),
@@ -121,6 +124,15 @@ export const bookChapters = pgTable(
   },
   (t) => [uniqueIndex("book_chapters_slug_idx").on(t.slug)],
 );
+
+/** Images uploaded from the admin (stored in Postgres, served at /media/<id>). */
+export const mediaFiles = pgTable("media_files", {
+  id: serial("id").primaryKey(),
+  mime: varchar("mime", { length: 64 }).notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  dataBase64: text("data_base64").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export type Profile = typeof profileSettings.$inferSelect;
 export type Experience = typeof experiences.$inferSelect;

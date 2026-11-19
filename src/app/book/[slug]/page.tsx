@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ChapterMediaSection } from "@/components/ChapterMedia";
 import { Markdown } from "@/components/Markdown";
 import { ProjectCard } from "@/components/ProjectCard";
 import { ReaderChrome } from "@/components/ReaderChrome";
@@ -75,6 +76,8 @@ export default async function ChapterPage({ params }: Props) {
               <Markdown slugs>{chapter.contentMarkdown}</Markdown>
             </article>
           </ReaderChrome>
+
+          <ChapterMediaSection items={chapter.media} chapterTitle={chapter.title} />
 
           {related.length > 0 && (
             <section className="mt-16" aria-label="Related case studies">

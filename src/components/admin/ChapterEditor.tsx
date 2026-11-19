@@ -8,6 +8,7 @@ import { CHAPTER_STATUS_LABEL } from "@/lib/format";
 import { joinSections, readingTime, slugify, splitSections, wordCount } from "@/lib/markdown";
 import { ArrowDown, ArrowUp } from "../icons";
 import { Markdown } from "../Markdown";
+import { MediaPanel } from "./MediaPanel";
 import { Field, SubmitButton } from "./ui";
 
 type Props = {
@@ -45,6 +46,11 @@ export function ChapterEditor({ chapter, parts, projects }: Props) {
     if (!h) return;
     setContent(joinSections(parsed.intro, [...parsed.sections, { heading: h, level: 2, body: "" }]));
     setNewSection("");
+  }
+  function insertAtCursor(md: string) {
+    const el = area.current;
+    const at = el ? el.selectionStart : content.length;
+    setContent((c) => c.slice(0, at) + md + c.slice(at));
   }
   function jumpTo(heading: string) {
     const el = area.current;
@@ -167,6 +173,8 @@ export function ChapterEditor({ chapter, parts, projects }: Props) {
           </div>
         </aside>
       </div>
+
+      <MediaPanel initial={chapter?.media ?? []} onInsert={insertAtCursor} />
 
       <div className="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 rounded-full border border-line bg-[var(--nav)] px-4 py-3 backdrop-blur-xl">
         <SubmitButton name="intent" value="save">Save chapter</SubmitButton>

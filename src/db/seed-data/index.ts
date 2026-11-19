@@ -400,6 +400,7 @@ export const seedChapters: BookChapter[] = (chaptersJson as RawChapter[]).map((c
   contentMarkdown: c.content,
   readingTimeMinutes: readingTime(c.content),
   relatedProjectSlugs: RELATED[c.label] ?? [],
+  media: [],
   publishedAt: PUBLISHED.has(c.label) ? T : null,
   createdAt: T,
   updatedAt: T,

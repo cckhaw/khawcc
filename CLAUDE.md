@@ -9,6 +9,7 @@ Next.js (App Router) + TypeScript + Tailwind v4 · Neon Postgres + Drizzle · de
 - `src/lib/data.ts` the only read layer. **Without `DATABASE_URL` it serves the seed data (demo mode)**; admin writes then throw.
 - `src/lib/actions/*` Server Actions. Every one starts with `requireAdmin()` and ends with `revalidateAll()` (`revalidatePath('/', 'layout')` + `/cv`, `/projects`, `/book`).
 - Auth: HMAC-signed HTTP-only cookie (`src/lib/session.ts`, Web Crypto) checked in `src/proxy.ts` (Next 16 "middleware"), in admin pages and in actions. `/book/[slug]` is dynamic so admins can preview drafts.
+- Chapter media: `book_chapters.media` (jsonb: images + YouTube links, edited in the chapter editor, shown under the chapter). Uploaded images live in `media_files` (base64 in Postgres), uploaded via `POST /api/admin/media` (admin only) and served at `/media/<id>`; helpers in `src/lib/media.ts`.
 - Markdown: `src/components/Markdown.tsx` (react-markdown, gfm, highlight, heading slugs); `src/lib/markdown.ts` (word count, reading time, TOC, section split).
 
 ## Commands

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireDb, schema } from "@/db";
 import { CHAPTER_STATUSES } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import { sanitizeMedia } from "@/lib/media";
 import { readingTime, slugify } from "@/lib/markdown";
 import { int, raw, revalidateAll, str } from "./util";
 
@@ -79,6 +80,12 @@ export async function saveChapter(fd: FormData) {
   if (!slug) throw new Error("Could not derive a slug.");
   const partId = int(fd, "partId", 0) || null;
   const related = fd.getAll("related").map(String).filter(Boolean);
+  let media: ReturnType<typeof sanitizeMedia> = [];
+  try {
+    media = sanitizeMedia(JSON.parse(String(fd.get("media") ?? "[]")));
+  } catch {
+    throw new Error("Could not read the media list. Please reload the page and try again.");
+  }
 
   const [existing] = id ? await db.select({ p: ch.publishedAt }).from(ch).where(eq(ch.id, id)) : [];
   const publishedAt = base.status === "draft" ? (existing?.p ?? null) : (existing?.p ?? new Date());
@@ -92,6 +99,7 @@ export async function saveChapter(fd: FormData) {
     contentMarkdown: content,
     readingTimeMinutes: readingTime(content), // authoritative, recomputed server-side
     relatedProjectSlugs: related,
+    media,
     publishedAt,
     updatedAt: new Date(),
   };

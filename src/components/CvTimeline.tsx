@@ -49,27 +49,44 @@ export function CvTimeline({ roles }: { roles: CvRole[] }) {
         </button>
       </div>
 
-      <ol className="relative space-y-5 border-l border-line pl-6 sm:pl-8">
+      <ol className="relative space-y-4 border-l border-line pl-5 sm:space-y-5 sm:pl-8">
         {roles.map((r) => {
           const hidden = filter !== "All" && r.domainTag !== filter;
           const isOpen = Boolean(open[r.id]);
           return (
             <li key={r.id} hidden={hidden} className={`cv-role relative ${hidden ? "cv-filtered" : ""}`}>
               <span
-                className={`absolute -left-[31px] top-7 h-2.5 w-2.5 rounded-full border-2 sm:-left-[39px] ${
+                className={`absolute -left-[26px] top-7 h-2.5 w-2.5 rounded-full border-2 sm:-left-[39px] ${
                   r.isCurrent ? "border-accent bg-accent" : "border-dim bg-bg"
                 } no-print`}
               />
-              <article className="glass p-6">
-                <div className="flex items-start justify-between gap-x-6 gap-y-1">
+              <article className="glass p-5 sm:p-6">
+                {/* Phone: logo + company + dates on one row, then the role title at full width */}
+                <div className="sm:hidden">
+                  <div className="flex items-center gap-3">
+                    <ProjectLogo name={r.company} logoUrl={r.logoUrl} size={40} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium leading-snug">
+                        <span className="text-accent">{r.company}</span>
+                        {r.location && <span className="font-normal text-dim"> · {r.location}</span>}
+                      </p>
+                      <p className="mt-0.5 font-mono text-[11px] text-muted">{fmtPeriod(r.startDate, r.endDate, r.isCurrent)}</p>
+                    </div>
+                  </div>
+                  <h3 className="mt-3 text-[1.05rem] font-semibold leading-snug tracking-tight">{r.roleTitle}</h3>
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-dim">{r.domainTag}</p>
+                </div>
+
+                {/* Tablet / desktop / print */}
+                <div className="hidden items-start justify-between gap-x-6 sm:flex">
                   <div className="flex min-w-0 items-start gap-4">
                     <ProjectLogo name={r.company} logoUrl={r.logoUrl} size={48} />
                     <div className="min-w-0">
-                    <h3 className="text-lg font-semibold leading-snug tracking-tight">{r.roleTitle}</h3>
-                    <p className="mt-0.5 text-sm">
-                      <span className="text-accent">{r.company}</span>
-                      {r.location && <span className="text-dim"> · {r.location}</span>}
-                    </p>
+                      <h3 className="text-lg font-semibold leading-snug tracking-tight">{r.roleTitle}</h3>
+                      <p className="mt-0.5 text-sm">
+                        <span className="text-accent">{r.company}</span>
+                        {r.location && <span className="text-dim"> · {r.location}</span>}
+                      </p>
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
@@ -93,7 +110,7 @@ export function CvTimeline({ roles }: { roles: CvRole[] }) {
                     </button>
                     <ul
                       hidden={!isOpen}
-                      className="cv-details mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted marker:text-dim"
+                      className="cv-details mt-3 list-disc space-y-1.5 pl-4 sm:pl-5 text-sm leading-relaxed text-muted marker:text-dim"
                     >
                       {r.highlightNodes.map((h, i) => (
                         <li key={i}>{h}</li>

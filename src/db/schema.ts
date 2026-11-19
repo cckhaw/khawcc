@@ -31,6 +31,8 @@ export const profileSettings = pgTable("profile_settings", {
   instagramHandle: text("instagram_handle").notNull().default(""),
   /** Optional portrait (any https URL or /public path). Falls back to a monogram. */
   avatarUrl: text("avatar_url").notNull().default(""),
+  /** Big home-page headline; **words** get the gradient. Empty = built-in default (src/lib/hero.ts). */
+  heroHeadline: text("hero_headline").notNull().default(""),
   heroBio: text("hero_bio").notNull(),
   aboutNarrative: text("about_narrative").notNull().default(""),
   leadershipPhilosophy: text("leadership_philosophy").notNull().default(""),

@@ -26,6 +26,7 @@ export const seedProfile: Profile = {
   githubUrl: "https://github.com/cckhaw",
   instagramHandle: "",
   avatarUrl: "",
+  heroHeadline: "",
   heroBio:
     "Twenty-five years inside telecom: from 56k-modem support desks to leading full-stack BSS transformations, launching digital brands from zero, and now building AI-native software on the side. I turn messy, high-stakes platforms into things that quietly work.",
   aboutNarrative: `I started in 2001 on a technical support desk in Kuala Lumpur, remote-controlling broken systems for customers in Myanmar, New Zealand and India over a 56k modem. Twenty-five years later I still work the same way: get close to the real problem, then build the system that makes it go away.

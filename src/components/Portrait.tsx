@@ -45,7 +45,7 @@ export function Portrait({ profile }: { profile: Profile }) {
             <>
               {/* eslint-disable @next/next/no-img-element -- static, pre-optimised cut-outs */}
               <img src="/img/portrait-light.webp" alt={profile.fullName} width={627} height={838} className={`portrait-light ${img} h-full`} fetchPriority="high" />
-              <img src="/img/portrait-dark.webp" alt={profile.fullName} width={761} height={835} className={`portrait-dark ${img} h-[92%]`} loading="lazy" />
+              <img src="/img/portrait-dark.webp" alt={profile.fullName} width={760} height={834} className={`portrait-dark ${img} h-[92%]`} loading="lazy" />
               {/* eslint-enable @next/next/no-img-element */}
             </>
           )}

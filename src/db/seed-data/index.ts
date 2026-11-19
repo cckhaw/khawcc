@@ -380,7 +380,7 @@ const PART_OF: Record<string, number> = {
   "6": 2, "6.1": 2, "7": 2, "8": 2, "9": 2, "9.1": 2,
   "10": 3, Annex: 3,
 };
-const PUBLISHED = new Set<string>(); // all chapters start as drafts; publish them from /admin/book
+const PUBLISHED = new Set(Object.keys(PART_OF)); // all manuscript chapters are published
 const RELATED: Record<string, string[]> = {
   "8": ["plansifu"],
   "9": ["meridian"],
@@ -395,7 +395,7 @@ export const seedChapters: BookChapter[] = (chaptersJson as RawChapter[]).map((c
   slug: c.slug,
   title: c.title,
   subtitle: "",
-  status: PUBLISHED.has(c.label) ? ("wip_published" as const) : ("draft" as const),
+  status: PUBLISHED.has(c.label) ? ("published" as const) : ("draft" as const),
   summary: c.summary,
   contentMarkdown: c.content,
   readingTimeMinutes: readingTime(c.content),

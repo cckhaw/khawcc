@@ -55,3 +55,42 @@ export function sanitizeApacDoc(input: unknown): ApacDoc {
   });
   return { stats, items };
 }
+
+/** Pins are drawn this many times larger than the 26-unit base shape. */
+export const PIN_SCALE = 2;
+
+/**
+ * Where to draw each pin so neighbours don't overlap: a few rounds of gentle repulsion,
+ * with a spring back to the true location. Deterministic (same on server and client).
+ */
+export function layoutPins(items: { x: number; y: number }[], scale = PIN_SCALE): { x: number; y: number }[] {
+  const minD = 30 * scale;
+  const t = items.map((i) => ({ x: i.x, y: i.y }));
+  for (let iter = 0; iter < 80; iter++) {
+    for (let i = 0; i < t.length; i++) {
+      for (let j = i + 1; j < t.length; j++) {
+        let dx = t[i].x - t[j].x;
+        let dy = t[i].y - t[j].y;
+        let d = Math.hypot(dx, dy);
+        if (d >= minD) continue;
+        if (d < 0.01) {
+          dx = 1;
+          dy = 0;
+          d = 1;
+        }
+        const push = (minD - d) / 2;
+        t[i].x += (dx / d) * push;
+        t[i].y += (dy / d) * push;
+        t[j].x -= (dx / d) * push;
+        t[j].y -= (dy / d) * push;
+      }
+    }
+    for (let i = 0; i < t.length; i++) {
+      t[i].x += (items[i].x - t[i].x) * 0.012;
+      t[i].y += (items[i].y - t[i].y) * 0.012;
+      t[i].x = Math.min(MAP_W - 20, Math.max(20, t[i].x));
+      t[i].y = Math.min(MAP_H - 4, Math.max(22 * scale + 4, t[i].y));
+    }
+  }
+  return t.map((p) => ({ x: Math.round(p.x * 10) / 10, y: Math.round(p.y * 10) / 10 }));
+}

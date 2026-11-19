@@ -1,21 +1,34 @@
+"use client";
+
+import { useState } from "react";
 import map from "@/data/apac-map.json";
-import { labelFor, MAP_H, MAP_W, type ApacDoc, type ApacItem } from "@/lib/apac";
+import { labelFor, layoutPins, MAP_H, MAP_W, PIN_SCALE, type ApacDoc, type ApacItem } from "@/lib/apac";
 
 export const PIN_PATH = "M0 0C-6 -9 -13 -14 -13 -22a13 13 0 1 1 26 0C13 -14 6 -9 0 0Z";
 export const MAP_LAND = map.land;
 export const MAP_BORDERS = map.borders;
 
-/** Hover links between legend rows and map pins, with no JavaScript. */
+/** Palette, hover links and the glow / breathing animation (no JS needed for hover). */
 const makeCss = (n: number) => {
   const hover = Array.from({ length: n }, (_, i) =>
-    `.apac:has(.leg-${i}:hover) .pin-${i} .pin-body,.apac .pin-${i}:hover .pin-body{transform:scale(1.3)}` +
+    `.apac:has(.leg-${i}:hover) .pin-${i} .pin-body,.apac .pin-${i}:hover .pin-body{transform:scale(1.2)}` +
     `.apac:has(.pin-${i}:hover) .leg-${i},.apac .leg-${i}:hover{background:var(--apac-box)}`,
   ).join("");
   return `
 .apac{--apac-land:#7aaed6;--apac-line:#fff;--apac-ink:#0d4664;--apac-soft:#3b6178;--apac-box:#dceaf7;--apac-sea:#e9f2fa;--apac-pin:#3a4350;--apac-hot:#d8482c;color:var(--apac-ink)}
 :root[data-theme="dark"] .apac-site{--apac-land:#3d6283;--apac-line:#14110f;--apac-ink:#e8f1f8;--apac-soft:#a9bfd0;--apac-box:rgba(122,174,214,.14);--apac-sea:rgba(122,174,214,.07);--apac-pin:#f4eee7;--apac-hot:#ff8a66}
 .apac .pin-body{transform-box:fill-box;transform-origin:50% 100%;transition:transform .18s ease}
-.apac .leg{transition:background .15s}
+.apac .leg{transition:background .15s,box-shadow .15s}
+.apac .leg.is-selected{background:var(--apac-box);box-shadow:inset 3px 0 0 var(--apac-hot)}
+.apac .pin-live .pin-breathe{transform-box:fill-box;transform-origin:50% 100%;animation:apac-breathe 2.4s ease-in-out infinite}
+.apac .pin-live .pin-glow{animation:apac-glow 2.4s ease-in-out infinite}
+.apac .pin-live .pin-ring{transform-box:fill-box;transform-origin:center;animation:apac-ring 2.4s ease-out infinite}
+.apac .pin-live .pin-ring.r2{animation-delay:1.2s}
+.apac .pin-static .pin-glow{opacity:.6}
+@keyframes apac-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+@keyframes apac-glow{0%,100%{opacity:.35}50%{opacity:.95}}
+@keyframes apac-ring{0%{transform:scale(.7);opacity:.7}100%{transform:scale(2.6);opacity:0}}
+@media (prefers-reduced-motion:reduce){.apac .pin-live .pin-breathe,.apac .pin-live .pin-glow,.apac .pin-live .pin-ring{animation:none}.apac .pin-live .pin-glow{opacity:.5}.apac .pin-live .pin-ring{opacity:.3;transform:scale(1.8)}}
 ${hover}`;
 };
 
@@ -23,80 +36,151 @@ ${hover}`;
 export const APAC_BASE_CSS = makeCss(0);
 
 /** One map pin (tip at 0,0 of its parent transform). Shared with the admin editor. */
-export function PinShape({ label, hot, selected = false }: { label: string; hot: boolean; selected?: boolean }) {
+export function PinShape({ label, hot, selected = false, scale = PIN_SCALE }: { label: string; hot: boolean; selected?: boolean; scale?: number }) {
   return (
-    <>
-      <path d={PIN_PATH} fill={hot ? "var(--apac-hot)" : "var(--apac-pin)"} stroke={selected ? "var(--apac-hot)" : "#fff"} strokeWidth={selected ? 3 : 1.5} />
-      <circle cy="-22" r="8.6" fill="#fff" />
-      <text y="-18.4" textAnchor="middle" fontSize="11.5" fontWeight="700" fill={hot ? "var(--apac-hot)" : "#1f2933"} style={{ fontFamily: "Inter Variable, system-ui, sans-serif" }}>
+    <g transform={`scale(${scale})`}>
+      <path d={PIN_PATH} fill={hot ? "var(--apac-hot)" : "var(--apac-pin)"} stroke={selected ? "var(--apac-hot)" : "#fff"} strokeWidth={selected ? 2.4 : 1.5} />
+      <circle cy="-22" r="8.8" fill="#fff" />
+      <text y="-18" textAnchor="middle" fontSize="12" fontWeight="700" fill={hot ? "var(--apac-hot)" : "#1f2933"} style={{ fontFamily: "Inter Variable, system-ui, sans-serif" }}>
         {label}
       </text>
-    </>
+    </g>
   );
 }
 
-function Pins({ items }: { items: ApacItem[] }) {
+function Pins({
+  items,
+  selected,
+  onSelect,
+  animated,
+}: {
+  items: ApacItem[];
+  selected: number | null;
+  onSelect?: (i: number) => void;
+  animated: boolean;
+}) {
+  const shown = layoutPins(items);
+  const order = items.map((_, i) => i).sort((a, b) => Number(a === selected) - Number(b === selected)); // selected on top
+  const head = 22 * PIN_SCALE;
   return (
     <>
-      {items.map((p, i) => (
-        <g key={p.id} className={`pin-${i}`} transform={`translate(${p.x} ${p.y})`}>
-          <title>{`${labelFor(i)}: ${p.text}`}</title>
-          <g className="pin-body">
-            <PinShape label={labelFor(i)} hot={p.current} />
+      <filter id="apac-blur" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="7" />
+      </filter>
+      {/* leader lines for pins nudged away from their true location */}
+      {items.map((p, i) => {
+        const d = Math.hypot(shown[i].x - p.x, shown[i].y - p.y);
+        return d > 4 ? (
+          <g key={`lead-${p.id}`} pointerEvents="none">
+            <line x1={p.x} y1={p.y} x2={shown[i].x} y2={shown[i].y} stroke="var(--apac-pin)" strokeWidth="2" opacity=".55" />
+            <circle cx={p.x} cy={p.y} r="3.6" fill="var(--apac-pin)" stroke="#fff" strokeWidth="1" />
           </g>
-        </g>
-      ))}
+        ) : null;
+      })}
+      {order.map((i) => {
+        const p = items[i];
+        const on = p.current || selected === i;
+        const label = labelFor(i);
+        return (
+          <g
+            key={p.id}
+            className={`pin-${i} ${on ? (animated ? "pin-live" : "pin-static") : ""}`}
+            transform={`translate(${shown[i].x} ${shown[i].y})`}
+            role={onSelect ? "button" : undefined}
+            tabIndex={onSelect ? 0 : undefined}
+            aria-pressed={onSelect ? selected === i : undefined}
+            aria-label={`${label}: ${p.text}`}
+            style={onSelect ? { cursor: "pointer", outline: "none" } : undefined}
+            onClick={onSelect ? () => onSelect(i) : undefined}
+            onKeyDown={onSelect ? (e) => (e.key === "Enter" || e.key === " " ? (e.preventDefault(), onSelect(i)) : undefined) : undefined}
+          >
+            <title>{`${label}: ${p.text}`}</title>
+            {on && (
+              <>
+                <circle className="pin-ring" cy={-head / 2} r={14 * PIN_SCALE * 0.5} fill="none" stroke="var(--apac-hot)" strokeWidth="3.5" opacity="0" />
+                <circle className="pin-ring r2" cy={-head / 2} r={14 * PIN_SCALE * 0.5} fill="none" stroke="var(--apac-hot)" strokeWidth="3.5" opacity="0" />
+                <circle className="pin-glow" cy={-head / 2} r={17 * PIN_SCALE * 0.95} fill="var(--apac-hot)" opacity=".5" filter="url(#apac-blur)" />
+              </>
+            )}
+            <circle cy={-head / 2} r={15 * PIN_SCALE} fill="transparent" /> {/* generous tap target */}
+            <g className="pin-body">
+              <g className="pin-breathe">
+                <PinShape label={label} hot={p.current} selected={selected === i} />
+              </g>
+            </g>
+          </g>
+        );
+      })}
     </>
   );
 }
 
-function MapSvg({ items, fill = false }: { items: ApacItem[]; fill?: boolean }) {
+function MapSvg({ items, selected, onSelect, animated, fill = false }: { items: ApacItem[]; selected: number | null; onSelect?: (i: number) => void; animated: boolean; fill?: boolean }) {
   return (
     <svg
       viewBox={`0 0 ${MAP_W} ${MAP_H}`}
       preserveAspectRatio={fill ? "xMidYMid slice" : "xMidYMid meet"}
-      role="img"
+      role="group"
       aria-label={`Map of Asia-Pacific showing the locations of selected telecom projects, labelled A to ${labelFor(Math.max(0, items.length - 1))}`}
       className={fill ? "absolute inset-0 h-full w-full" : "block h-auto w-full"}
     >
       <path d={MAP_LAND} fill="var(--apac-land)" />
       <path d={MAP_BORDERS} fill="none" stroke="var(--apac-line)" strokeWidth="0.8" strokeLinejoin="round" />
-      <Pins items={items} />
+      <Pins items={items} selected={selected} onSelect={onSelect} animated={animated} />
     </svg>
   );
 }
 
-function Legend({ items, compact = false }: { items: ApacItem[]; compact?: boolean }) {
+function Legend({ items, selected, onSelect, compact = false }: { items: ApacItem[]; selected: number | null; onSelect?: (i: number) => void; compact?: boolean }) {
   return (
     <ol className={compact ? "space-y-1" : "space-y-1.5"}>
-      {items.map((p, i) => (
-        <li key={p.id} className={`leg leg-${i} flex gap-3 rounded-lg px-2 py-1 ${compact ? "text-[15px] leading-snug" : "text-sm leading-snug"}`}>
-          <span className="w-5 shrink-0 text-base font-bold" style={{ color: p.current ? "var(--apac-hot)" : "var(--apac-ink)" }}>
-            {labelFor(i)}
-          </span>
-          <span className="min-w-0" style={{ color: "var(--apac-ink)" }}>
-            {p.text}
-            {p.current && (
-              <span className="ml-2 inline-block rounded-full px-2 py-0.5 align-middle text-[10px] font-semibold" style={{ background: "var(--apac-hot)", color: "#fff" }}>
-                NOW
-              </span>
+      {items.map((p, i) => {
+        const inner = (
+          <>
+            <span className="w-5 shrink-0 text-base font-bold" style={{ color: p.current ? "var(--apac-hot)" : "var(--apac-ink)" }}>
+              {labelFor(i)}
+            </span>
+            <span className="min-w-0" style={{ color: "var(--apac-ink)" }}>
+              {p.text}
+              {p.current && (
+                <span className="ml-2 inline-block rounded-full px-2 py-0.5 align-middle text-[10px] font-semibold" style={{ background: "var(--apac-hot)", color: "#fff" }}>
+                  NOW
+                </span>
+              )}
+            </span>
+          </>
+        );
+        const cls = `leg leg-${i} flex w-full gap-3 rounded-lg px-2 py-1.5 text-left ${compact ? "text-[15px] leading-snug" : "text-sm leading-snug"} ${selected === i ? "is-selected" : ""}`;
+        return (
+          <li key={p.id}>
+            {onSelect ? (
+              <button type="button" className={cls} aria-pressed={selected === i} onClick={() => onSelect(i)}>
+                {inner}
+              </button>
+            ) : (
+              <div className={cls}>{inner}</div>
             )}
-          </span>
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ol>
   );
 }
 
-/** Responsive version for the website. */
+/** Responsive, interactive version for the website. Tapping a project or pin keeps it highlighted. */
 export function ApacMap({ doc }: { doc: ApacDoc }) {
   const items = doc.items.filter((i) => i.visible);
+  const [selected, setSelected] = useState<number | null>(() => {
+    const i = items.findIndex((x) => x.current);
+    return i >= 0 ? i : null;
+  });
+  const toggle = (i: number) => setSelected((s) => (s === i ? null : i));
   return (
     <div className="apac apac-site">
       <style dangerouslySetInnerHTML={{ __html: makeCss(items.length) }} />
       <div className="grid items-start gap-8 lg:grid-cols-[1.1fr_1fr]">
-        <div className="overflow-hidden rounded-3xl" style={{ background: "var(--apac-sea)" }}>
-          <MapSvg items={items} />
+        <div className="overflow-hidden rounded-3xl lg:sticky lg:top-20" style={{ background: "var(--apac-sea)" }}>
+          <MapSvg items={items} selected={selected} onSelect={toggle} animated />
         </div>
         <div>
           {doc.stats.length > 0 && (
@@ -111,14 +195,17 @@ export function ApacMap({ doc }: { doc: ApacDoc }) {
               ))}
             </ul>
           )}
-          <Legend items={items} />
+          <p className="mb-2 text-xs" style={{ color: "var(--apac-soft)" }}>
+            Tap a project or a pin to keep it highlighted on the map.
+          </p>
+          <Legend items={items} selected={selected} onSelect={toggle} />
         </div>
       </div>
     </div>
   );
 }
 
-/** Fixed-size poster (1200 px wide) for the shareable image. */
+/** Fixed-size poster (1200 px wide) for the shareable image. Static: the "now" pin keeps a soft glow. */
 export function ApacPoster({ doc }: { doc: ApacDoc }) {
   const items = doc.items.filter((i) => i.visible);
   const font = "Inter Variable, system-ui, sans-serif";
@@ -142,9 +229,9 @@ export function ApacPoster({ doc }: { doc: ApacDoc }) {
       </div>
       <div className="mt-6 grid items-start gap-8" style={{ gridTemplateColumns: "600px 1fr" }}>
         <div style={{ background: "var(--apac-sea)", borderRadius: 28, alignSelf: "stretch", position: "relative", overflow: "hidden", minHeight: 720 }}>
-          <MapSvg items={items} fill />
+          <MapSvg items={items} selected={null} animated={false} fill />
         </div>
-        <Legend items={items} compact />
+        <Legend items={items} selected={null} compact />
       </div>
     </div>
   );

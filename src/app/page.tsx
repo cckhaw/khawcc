@@ -107,7 +107,7 @@ export default async function HomePage() {
             </h2>
             <p className="mt-3 leading-relaxed text-muted">
               From Wi-Fi roaming hubs and policy managers to prepaid migrations and MVNE platforms, plus the Maxis BSS
-              transformation I&rsquo;m leading now. Hover a project to find it on the map.
+              transformation I&rsquo;m leading now. Tap a project to find it on the map.
             </p>
           </div>
           <Link href="/apac-map" className="no-print text-sm text-muted hover:text-fg">

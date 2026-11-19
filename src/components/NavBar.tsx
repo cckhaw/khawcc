@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { CloseIcon, LockIcon, MenuIcon } from "./icons";
+import { CloseIcon, MenuIcon } from "./icons";
 import { ThemeToggle } from "./ThemeToggle";
 
 const LINKS = [
@@ -63,14 +63,6 @@ export function NavBar({ name }: { name: string }) {
               <span className="h-1.5 w-1.5 rounded-full bg-accent" /> Admin Mode
             </Link>
           )}
-          <Link
-            href={admin ? "/admin" : "/admin/login"}
-            aria-label="Admin"
-            title="Admin"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-card text-dim transition hover:text-fg"
-          >
-            <LockIcon />
-          </Link>
           <ThemeToggle />
           <button
             type="button"

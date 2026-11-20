@@ -24,7 +24,8 @@ export const seedProfile: Profile = {
   email: "",
   linkedinUrl: "",
   githubUrl: "https://github.com/cckhaw",
-  instagramHandle: "",
+  instagramHandle: "botak.on.wheels",
+  stravaUrl: "https://www.strava.com/athletes/3375135",
   avatarUrl: "",
   heroHeadline: "",
   heroBio:

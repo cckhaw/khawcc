@@ -21,6 +21,7 @@ export default async function AdminProfile({ searchParams }: { searchParams: Pro
           <Field label="LinkedIn URL"><input name="linkedinUrl" defaultValue={p.linkedinUrl} className="field" /></Field>
           <Field label="GitHub URL"><input name="githubUrl" defaultValue={p.githubUrl} className="field" /></Field>
           <Field label="Instagram handle"><input name="instagramHandle" defaultValue={p.instagramHandle} placeholder="@handle" className="field" /></Field>
+          <Field label="Strava profile URL"><input name="stravaUrl" defaultValue={p.stravaUrl} placeholder="https://www.strava.com/athletes/…" className="field" /></Field>
           <Field label="Portrait image URL" hint="Optional. Leave blank to show the monogram." className="sm:col-span-2">
             <input name="avatarUrl" defaultValue={p.avatarUrl} placeholder="https://… or /me.jpg (file in /public)" className="field" />
           </Field>

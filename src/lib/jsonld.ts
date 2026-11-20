@@ -7,6 +7,7 @@ export function personLd(profile: Profile, experiences: Experience[] = [], skill
   const sameAs = [
     profile.linkedinUrl,
     profile.githubUrl,
+    profile.stravaUrl,
     profile.instagramHandle && `https://instagram.com/${profile.instagramHandle.replace(/^@/, "")}`,
   ].filter(Boolean);
   const knows = skills.find((g) => g.category === "Core Competencies")?.items.slice(0, 8) ?? [];

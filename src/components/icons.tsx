@@ -112,3 +112,8 @@ export const EyeOffIcon = (p: P) => (
     <path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.3 4.2M6.6 6.7C3.9 8.4 2 12 2 12s3.6 7 10 7a9.8 9.8 0 0 0 4.4-1" />
   </svg>
 );
+export const StravaIcon = (p: P) => (
+  <svg {...base(p)} fill="currentColor" stroke="none">
+    <path d="M15.4 17.9 12.9 13h-3.7L15.4 2l6.2 11h-3.7zM10.2 21.9l-2.5-4.9H3.9L10.2 6l2.5 5h-1.1z" />
+  </svg>
+);

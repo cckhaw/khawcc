@@ -2,6 +2,7 @@ import { neon } from "@neondatabase/serverless";
 import { and, eq, like } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
+import { DEFAULT_BEYOND } from "../lib/beyond";
 import { DEFAULT_BOOK_INTRO } from "../lib/book-intro";
 import { DEFAULT_APAC_DOC } from "../data/apac-projects";
 import { seedChapters, seedExperiences, seedParts, seedProfile, seedProjects, seedSkills } from "./seed-data";
@@ -79,6 +80,8 @@ async function main() {
   console.log("✓ APAC map content ensured");
   await db.insert(schema.siteContent).values({ key: "book_intro", value: DEFAULT_BOOK_INTRO }).onConflictDoNothing();
   console.log("✓ book page text ensured");
+  await db.insert(schema.siteContent).values({ key: "beyond_work", value: DEFAULT_BEYOND }).onConflictDoNothing();
+  console.log("✓ beyond-the-desk strip ensured");
   console.log("Seed complete.");
 }
 

@@ -29,6 +29,7 @@ export const profileSettings = pgTable("profile_settings", {
   linkedinUrl: text("linkedin_url").notNull().default(""),
   githubUrl: text("github_url").notNull().default(""),
   instagramHandle: text("instagram_handle").notNull().default(""),
+  stravaUrl: text("strava_url").notNull().default(""),
   /** Optional portrait (any https URL or /public path). Falls back to a monogram. */
   avatarUrl: text("avatar_url").notNull().default(""),
   /** Big home-page headline; **words** get the gradient. Empty = built-in default (src/lib/hero.ts). */

@@ -11,6 +11,7 @@ import {
 } from "@/db/seed-data";
 import { DEFAULT_APAC_DOC } from "@/data/apac-projects";
 import { sanitizeApacDoc, type ApacDoc } from "@/lib/apac";
+import { BEYOND_KEY, DEFAULT_BEYOND, sanitizeBeyond, type BeyondDoc } from "@/lib/beyond";
 import { BOOK_INTRO_KEY, DEFAULT_BOOK_INTRO, sanitizeBookIntro, type BookIntro } from "@/lib/book-intro";
 import type { BookChapter, BookPart, Experience, Profile, Project, SkillGroup } from "@/db/schema";
 
@@ -175,4 +176,12 @@ export async function getBookIntro(): Promise<BookIntro> {
   if (!db) return DEFAULT_BOOK_INTRO;
   const [row] = await db.select().from(schema.siteContent).where(eq(schema.siteContent.key, BOOK_INTRO_KEY));
   return row ? sanitizeBookIntro(row.value) : DEFAULT_BOOK_INTRO;
+}
+
+/** The "Beyond the desk" strip: from the database when edited, otherwise the built-in default. */
+export async function getBeyond(): Promise<BeyondDoc> {
+  const db = getDb();
+  if (!db) return DEFAULT_BEYOND;
+  const [row] = await db.select().from(schema.siteContent).where(eq(schema.siteContent.key, BEYOND_KEY));
+  return row ? sanitizeBeyond(row.value) : DEFAULT_BEYOND;
 }

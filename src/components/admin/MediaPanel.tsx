@@ -2,19 +2,8 @@
 
 import { useRef, useState } from "react";
 import { MAX_MEDIA_PER_CHAPTER, parseYouTubeId, isSafeImageUrl, youtubeThumb, type ChapterMedia } from "@/lib/media";
+import { uploadImage } from "@/lib/image-upload";
 import { ArrowDown, ArrowUp } from "../icons";
-
-/** Downscale to <=1800px and re-encode as WebP (JPEG fallback) before upload. */
-async function prepare(file: File): Promise<Blob> {
-  const bmp = await createImageBitmap(file);
-  const scale = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bmp.width * scale);
-  canvas.height = Math.round(bmp.height * scale);
-  canvas.getContext("2d")!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
-  const blob = (type: string, q: number) => new Promise<Blob | null>((r) => canvas.toBlob(r, type, q));
-  return (await blob("image/webp", 0.85)) ?? (await blob("image/jpeg", 0.85)) ?? file;
-}
 
 export function MediaPanel({
   initial,
@@ -75,15 +64,11 @@ export function MediaPanel({
           setMsg(`${f.name}: use JPEG, PNG or WebP.`);
           continue;
         }
-        const fd = new FormData();
-        fd.append("file", await prepare(f), f.name.replace(/\.\w+$/, "") + ".webp");
-        const res = await fetch("/api/admin/media", { method: "POST", body: fd });
-        const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-        if (!res.ok || !data.url) {
-          setMsg(data.error ?? `Upload failed (${res.status}).`);
-          continue;
+        try {
+          add({ type: "image", url: await uploadImage(f, 1800), caption: "" });
+        } catch (e) {
+          setMsg(`${f.name}: ${e instanceof Error ? e.message : "Upload failed."}`);
         }
-        add({ type: "image", url: data.url, caption: "" });
       }
     } finally {
       setBusy(false);

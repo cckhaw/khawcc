@@ -1,12 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import map from "@/data/apac-map.json";
 import { labelFor, layoutPins, MAP_H, MAP_W, PIN_SCALE, type ApacDoc, type ApacItem } from "@/lib/apac";
 
 export const PIN_PATH = "M0 0C-6 -9 -13 -14 -13 -22a13 13 0 1 1 26 0C13 -14 6 -9 0 0Z";
 export const MAP_LAND = map.land;
 export const MAP_BORDERS = map.borders;
+
+/** True when the visitor asked their device for reduced motion. */
+function useReducedMotion(): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () => false,
+  );
+}
 
 /** Palette, hover links and the glow / breathing animation (no JS needed for hover). */
 const makeCss = (n: number) => {
@@ -20,15 +33,7 @@ const makeCss = (n: number) => {
 .apac .pin-body{transform-box:fill-box;transform-origin:50% 100%;transition:transform .18s ease}
 .apac .leg{transition:background .15s,box-shadow .15s}
 .apac .leg.is-selected{background:var(--apac-box);box-shadow:inset 3px 0 0 var(--apac-hot)}
-.apac .pin-live .pin-breathe{transform-box:fill-box;transform-origin:50% 100%;animation:apac-breathe 2.4s ease-in-out infinite}
-.apac .pin-live .pin-glow{animation:apac-glow 2.4s ease-in-out infinite}
-.apac .pin-live .pin-ring{transform-box:fill-box;transform-origin:center;animation:apac-ring 2.4s ease-out infinite}
-.apac .pin-live .pin-ring.r2{animation-delay:1.2s}
 .apac .pin-static .pin-glow{opacity:.6}
-@keyframes apac-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
-@keyframes apac-glow{0%,100%{opacity:.35}50%{opacity:.95}}
-@keyframes apac-ring{0%{transform:scale(.7);opacity:.7}100%{transform:scale(2.6);opacity:0}}
-@media (prefers-reduced-motion:reduce){.apac .pin-live .pin-breathe,.apac .pin-live .pin-glow,.apac .pin-live .pin-ring{animation:none}.apac .pin-live .pin-glow{opacity:.5}.apac .pin-live .pin-ring{opacity:.3;transform:scale(1.8)}}
 ${hover}`;
 };
 
@@ -60,6 +65,7 @@ function Pins({
   animated: boolean;
 }) {
   const shown = layoutPins(items);
+  const reduced = useReducedMotion();
   const order = items.map((_, i) => i).sort((a, b) => Number(a === selected) - Number(b === selected)); // selected on top
   const head = 22 * PIN_SCALE;
   return (
@@ -97,14 +103,42 @@ function Pins({
             <title>{`${label}: ${p.text}`}</title>
             {on && (
               <>
-                <circle className="pin-ring" cy={-head / 2} r={14 * PIN_SCALE * 0.5} fill="none" stroke="var(--apac-hot)" strokeWidth="3.5" opacity="0" />
-                <circle className="pin-ring r2" cy={-head / 2} r={14 * PIN_SCALE * 0.5} fill="none" stroke="var(--apac-hot)" strokeWidth="3.5" opacity="0" />
-                <circle className="pin-glow" cy={-head / 2} r={17 * PIN_SCALE * 0.95} fill="var(--apac-hot)" opacity=".5" filter="url(#apac-blur)" />
+                {/* Pulse and breathing use SMIL (<animate>), which iPhone Safari runs reliably.
+                    With "Reduce Motion" on, only a gentle glow fades in and out (no movement). */}
+                {animated && !reduced &&
+                  [0, 1.2].map((delay) => (
+                    <circle key={delay} className="pin-ring" cy={-head / 2} r={14 * PIN_SCALE * 0.5} fill="none" stroke="var(--apac-hot)" strokeWidth="3.5" opacity="0">
+                      <animate attributeName="r" values={`${14 * PIN_SCALE * 0.5};${14 * PIN_SCALE * 1.6}`} dur="2.4s" begin={`${delay}s`} repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.75;0" dur="2.4s" begin={`${delay}s`} repeatCount="indefinite" />
+                    </circle>
+                  ))}
+                <circle className="pin-glow" cy={-head / 2} r={17 * PIN_SCALE * 0.95} fill="var(--apac-hot)" opacity=".5" filter="url(#apac-blur)">
+                  {animated && (
+                    <animate
+                      attributeName="opacity"
+                      values={reduced ? "0.4;0.75;0.4" : "0.35;0.95;0.35"}
+                      dur={reduced ? "3.6s" : "2.4s"}
+                      repeatCount="indefinite"
+                    />
+                  )}
+                </circle>
               </>
             )}
             <circle cy={-head / 2} r={15 * PIN_SCALE} fill="transparent" /> {/* generous tap target */}
             <g className="pin-body">
               <g className="pin-breathe">
+                {on && animated && !reduced && (
+                  <animateTransform
+                    attributeName="transform"
+                    type="scale"
+                    values="1;1.14;1"
+                    keyTimes="0;0.5;1"
+                    calcMode="spline"
+                    keySplines="0.45 0 0.55 1;0.45 0 0.55 1"
+                    dur="2.4s"
+                    repeatCount="indefinite"
+                  />
+                )}
                 <PinShape label={label} hot={p.current} selected={selected === i} />
               </g>
             </g>

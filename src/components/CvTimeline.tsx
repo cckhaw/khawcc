@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Experience } from "@/db/schema";
 import { fmtPeriod } from "@/lib/format";
 import { ChevronDown } from "./icons";
-import { ProjectLogo } from "./ProjectLogo";
+import { CompanyLogos } from "./CompanyLogos";
 
 /** Experience rows arrive with Markdown pre-rendered on the server. */
 export type CvRole = Omit<Experience, "summary"> & { summaryNode: React.ReactNode; highlightNodes: React.ReactNode[] };
@@ -64,7 +64,7 @@ export function CvTimeline({ roles }: { roles: CvRole[] }) {
                 {/* Phone: logo + company + dates on one row, then the role title at full width */}
                 <div className="sm:hidden">
                   <div className="flex items-center gap-3">
-                    <ProjectLogo name={r.company} logoUrl={r.logoUrl} size={40} />
+                    <CompanyLogos name={r.company} logos={[r.logoUrl, r.logoUrl2]} size={40} />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium leading-snug">
                         <span className="text-accent">{r.company}</span>
@@ -80,7 +80,7 @@ export function CvTimeline({ roles }: { roles: CvRole[] }) {
                 {/* Tablet / desktop / print */}
                 <div className="hidden items-start justify-between gap-x-6 sm:flex">
                   <div className="flex min-w-0 items-start gap-4">
-                    <ProjectLogo name={r.company} logoUrl={r.logoUrl} size={48} />
+                    <CompanyLogos name={r.company} logos={[r.logoUrl, r.logoUrl2]} size={48} />
                     <div className="min-w-0">
                       <h3 className="text-lg font-semibold leading-snug tracking-tight">{r.roleTitle}</h3>
                       <p className="mt-0.5 text-sm">

@@ -51,6 +51,8 @@ export const experiences = pgTable("experiences", {
   isCurrent: boolean("is_current").notNull().default(false),
   /** Company logo: https URL, /public path or /media/<id>. Empty = initial-letter tile. */
   logoUrl: text("logo_url").notNull().default(""),
+  /** Optional second company logo, shown beside the first (e.g. a merged or renamed employer). */
+  logoUrl2: text("logo_url_2").notNull().default(""),
   domainTag: text("domain_tag").notNull().default("Telco & BSS"),
   summary: text("summary").notNull().default(""),
   highlights: jsonb("highlights").$type<string[]>().notNull().default([]),

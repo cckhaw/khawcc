@@ -1,14 +1,14 @@
 import type { Experience } from "@/db/schema";
 import { fmtPeriod } from "@/lib/format";
 import { Markdown } from "./Markdown";
-import { ProjectLogo } from "./ProjectLogo";
+import { CompanyLogos } from "./CompanyLogos";
 
 export function ExperienceSnippet({ e }: { e: Experience }) {
   return (
     <article className="glass glass-hover flex h-full flex-col p-6">
       <div className="flex items-center justify-between gap-3">
         <p className="font-mono text-xs text-dim">{fmtPeriod(e.startDate, e.endDate, e.isCurrent)}</p>
-        <ProjectLogo name={e.company} logoUrl={e.logoUrl} size={36} />
+        <CompanyLogos name={e.company} logos={[e.logoUrl, e.logoUrl2]} size={36} />
       </div>
       <h3 className="mt-2 text-lg font-semibold leading-snug tracking-tight">{e.roleTitle}</h3>
       <p className="mt-1 text-sm text-accent">

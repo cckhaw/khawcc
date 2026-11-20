@@ -1,5 +1,5 @@
 import { ExperienceForm } from "@/components/admin/ExperienceForm";
-import { ProjectLogo } from "@/components/ProjectLogo";
+import { CompanyLogos } from "@/components/CompanyLogos";
 import { ConfirmButton } from "@/components/admin/ui";
 import { ArrowDown, ArrowUp, EyeIcon, EyeOffIcon } from "@/components/icons";
 import { deleteExperience, moveExperience, toggleExperience } from "@/lib/actions/experience";
@@ -23,7 +23,7 @@ export default async function AdminExperience({ searchParams }: { searchParams: 
         {rows.map((r, i) => (
           <li key={r.id} className={`glass p-4 ${r.isVisible ? "" : "opacity-60"}`}>
             <div className="flex items-start gap-3">
-              <ProjectLogo name={r.company} logoUrl={r.logoUrl} size={44} />
+              <CompanyLogos name={r.company} logos={[r.logoUrl, r.logoUrl2]} size={44} />
               <div className="min-w-0 flex-1">
                 <p className="font-medium leading-snug">{r.roleTitle}</p>
                 <p className="mt-0.5 text-sm text-muted">

@@ -1,0 +1,1 @@
+ALTER TABLE "experiences" ADD COLUMN "logo_url_2" text DEFAULT '' NOT NULL;

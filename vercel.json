@@ -2,5 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "npm run db:migrate && npm run db:seed && next build",
-  "git": { "deploymentEnabled": false }
+  "git": {
+    "deploymentEnabled": false
+  },
+  "crons": [
+    {
+      "path": "/api/cron/strava",
+      "schedule": "30 19 * * *"
+    }
+  ]
 }

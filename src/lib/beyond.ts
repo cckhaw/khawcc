@@ -3,12 +3,15 @@ import { isSafeImageUrl } from "./media";
 /** The quiet "Beyond the desk" strip on the home page (site_content, key "beyond_work"). */
 export type BeyondPhoto = { url: string; alt: string; href: string };
 export type BeyondStat = { value: string; label: string };
+/** Daily Strava sync state (the numbers themselves live in `stats`). */
+export type BeyondStrava = { auto: boolean; syncedAt: string };
 export type BeyondDoc = {
   enabled: boolean;
   heading: string;
   intro: string;
   stats: BeyondStat[];
   photos: BeyondPhoto[];
+  strava: BeyondStrava;
 };
 
 export const BEYOND_KEY = "beyond_work";
@@ -26,6 +29,7 @@ export const DEFAULT_BEYOND: BeyondDoc = {
     { value: "200 km", label: "longest ride (Audax)" },
   ],
   photos: [],
+  strava: { auto: false, syncedAt: "" },
 };
 
 const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
@@ -51,5 +55,9 @@ export function sanitizeBeyond(input: unknown): BeyondDoc {
     intro: text(r.intro, 500),
     stats,
     photos,
+    strava: {
+      auto: Boolean((r.strava as Record<string, unknown> | undefined)?.auto),
+      syncedAt: text((r.strava as Record<string, unknown> | undefined)?.syncedAt, 40),
+    },
   };
 }

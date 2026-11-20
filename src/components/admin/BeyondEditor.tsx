@@ -7,11 +7,12 @@ import { uploadImage } from "@/lib/image-upload";
 import { ArrowDown, ArrowUp } from "../icons";
 import { SubmitButton } from "./ui";
 
-export function BeyondEditor({ initial }: { initial: BeyondDoc }) {
+export function BeyondEditor({ initial, stravaConnected = false }: { initial: BeyondDoc; stravaConnected?: boolean }) {
   const [doc, setDoc] = useState<BeyondDoc>(initial);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const file = useRef<HTMLInputElement>(null);
+  const auto = stravaConnected && doc.strava.auto;
 
   const set = (p: Partial<BeyondDoc>) => setDoc((d) => ({ ...d, ...p }));
   const setStat = (i: number, p: Partial<BeyondDoc["stats"][number]>) => set({ stats: doc.stats.map((s, k) => (k === i ? { ...s, ...p } : s)) });
@@ -62,20 +63,34 @@ export function BeyondEditor({ initial }: { initial: BeyondDoc }) {
       </div>
 
       <div className="glass p-4 sm:p-5">
-        <div className="mb-3 flex items-baseline justify-between gap-2">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-sm font-semibold">Numbers (up to 4)</h2>
-          <p className="text-xs text-dim">Type your own figures from Strava, e.g. “1,200 km” / “ridden this year”.</p>
+          <p className="text-xs text-dim">{auto ? "Filled in automatically from Strava." : "Type your own figures, e.g. “1,200 km” / “ridden this year”."}</p>
         </div>
+        <label className={`mb-4 flex items-start gap-2 text-sm ${stravaConnected ? "" : "opacity-60"}`}>
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={auto}
+            disabled={!stravaConnected}
+            onChange={(e) => set({ strava: { ...doc.strava, auto: e.target.checked } })}
+          />
+          <span>
+            Update these from Strava every day (rides logged, km ridden, runs logged, km run)
+            {!stravaConnected && <span className="block text-xs text-dim">Connect Strava above first.</span>}
+            {auto && doc.strava.syncedAt && <span className="block text-xs text-dim">Last synced {new Date(doc.strava.syncedAt).toLocaleString()}</span>}
+          </span>
+        </label>
         <div className="space-y-2">
           {doc.stats.map((s, i) => (
             <div key={i} className="flex gap-2">
-              <input className="field !w-28 shrink-0" aria-label={`Number ${i + 1}`} value={s.value} maxLength={20} onChange={(e) => setStat(i, { value: e.target.value })} />
-              <input className="field min-w-0 flex-1" aria-label={`Label ${i + 1}`} value={s.label} maxLength={40} onChange={(e) => setStat(i, { label: e.target.value })} />
-              <button type="button" className="btn btn-sm btn-danger !px-2.5" aria-label="Remove" onClick={() => set({ stats: doc.stats.filter((_, k) => k !== i) })}>×</button>
+              <input className="field !w-28 shrink-0" aria-label={`Number ${i + 1}`} value={s.value} maxLength={20} disabled={auto} onChange={(e) => setStat(i, { value: e.target.value })} />
+              <input className="field min-w-0 flex-1" aria-label={`Label ${i + 1}`} value={s.label} maxLength={40} disabled={auto} onChange={(e) => setStat(i, { label: e.target.value })} />
+              {!auto && <button type="button" className="btn btn-sm btn-danger !px-2.5" aria-label="Remove" onClick={() => set({ stats: doc.stats.filter((_, k) => k !== i) })}>×</button>}
             </div>
           ))}
         </div>
-        {doc.stats.length < 4 && (
+        {!auto && doc.stats.length < 4 && (
           <button type="button" className="btn btn-sm mt-3" onClick={() => set({ stats: [...doc.stats, { value: "", label: "" }] })}>+ Add number</button>
         )}
       </div>

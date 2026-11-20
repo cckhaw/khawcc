@@ -36,6 +36,15 @@ export function BeyondWork({ doc, profile }: { doc: BeyondDoc; profile: Profile 
               </dl>
             )}
 
+            {doc.strava.auto && doc.stats.length > 0 && (
+              <p className="mt-3 text-[11px] text-dim">
+                Powered by{" "}
+                <a href={profile.stravaUrl || "https://www.strava.com"} target="_blank" rel="noopener noreferrer" className="font-semibold underline-offset-2 hover:underline">
+                  Strava
+                </a>
+              </p>
+            )}
+
             {links.length > 0 && (
               <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
                 {links.map(({ href, label, Icon, text }) => (

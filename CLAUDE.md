@@ -16,6 +16,7 @@ Next.js (App Router) + TypeScript + Tailwind v4 · Neon Postgres + Drizzle · de
 - Book landing text (intro + "still being written" note) is a `site_content` document (key `book_intro`, `src/lib/book-intro.ts`), edited at the top of `/admin/book`.
 - Home hero headline: `profile_settings.hero_headline` (`**words**` get the gradient; empty falls back to `src/lib/hero.ts`), edited in `/admin/profile`.
 - SEO: `src/lib/seo.ts` (SITE_URL, snippet), `src/lib/jsonld.ts` + `src/components/JsonLd.tsx` (Person / WebSite / ProfilePage / ItemList / Book / Article JSON-LD), `src/app/robots.ts`, `sitemap.ts` (published chapters only), `book/feed.xml` (RSS), per-page metadata + canonical URLs, `icon.png` / `apple-icon.png` / `favicon.ico`. Drafts and /admin are noindex. Lighthouse target: SEO 100, a11y 100.
+- "Beyond the desk" strip (Strava numbers, links, up to 6 Instagram photos): `site_content` key `beyond_work` (`src/lib/beyond.ts`), edited in `/admin/beyond`; Strava URL and Instagram handle are profile fields; rendered by `src/components/BeyondWork.tsx` near the bottom of the home page.
 - Markdown: `src/components/Markdown.tsx` (react-markdown, gfm, highlight, heading slugs); `src/lib/markdown.ts` (word count, reading time, TOC, section split).
 
 ## Commands

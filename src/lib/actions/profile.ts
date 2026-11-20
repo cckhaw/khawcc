@@ -17,6 +17,7 @@ export async function saveProfile(fd: FormData) {
     linkedinUrl: str(fd, "linkedinUrl"),
     githubUrl: str(fd, "githubUrl"),
     instagramHandle: str(fd, "instagramHandle"),
+    stravaUrl: str(fd, "stravaUrl"),
     avatarUrl: str(fd, "avatarUrl"),
     heroHeadline: str(fd, "heroHeadline").slice(0, 240),
     heroBio: raw(fd, "heroBio").trim(),

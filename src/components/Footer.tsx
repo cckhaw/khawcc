@@ -1,13 +1,15 @@
 import Link from "next/link";
 import type { Profile } from "@/db/schema";
-import { GithubIcon, InstagramIcon, LinkedinIcon, MailIcon } from "./icons";
+import { GithubIcon, InstagramIcon, LinkedinIcon, MailIcon, StravaIcon } from "./icons";
 
-export function SocialLinks({ profile, className = "" }: { profile: Profile; className?: string }) {
+/** `hero` keeps the top-of-page row to professional links; the footer shows everything. */
+export function SocialLinks({ profile, className = "", hero = false }: { profile: Profile; className?: string; hero?: boolean }) {
   const items = [
     profile.email && { href: `mailto:${profile.email}`, label: "Email", Icon: MailIcon },
     profile.linkedinUrl && { href: profile.linkedinUrl, label: "LinkedIn", Icon: LinkedinIcon },
     profile.githubUrl && { href: profile.githubUrl, label: "GitHub", Icon: GithubIcon },
-    profile.instagramHandle && {
+    !hero && profile.stravaUrl && { href: profile.stravaUrl, label: "Strava", Icon: StravaIcon },
+    !hero && profile.instagramHandle && {
       href: `https://instagram.com/${profile.instagramHandle.replace(/^@/, "")}`,
       label: "Instagram",
       Icon: InstagramIcon,

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ApacMap } from "@/components/ApacMap";
+import { BeyondWork } from "@/components/BeyondWork";
 import { ChapterCard } from "@/components/ChapterCard";
 import { ExperienceSnippet } from "@/components/ExperienceRow";
 import { SocialLinks } from "@/components/Footer";
@@ -9,7 +10,7 @@ import { Markdown } from "@/components/Markdown";
 import { Portrait } from "@/components/Portrait";
 import { ProjectCard } from "@/components/ProjectCard";
 import { SectionHeader } from "@/components/ui/Section";
-import { getApacDoc, getExperiences, getLatestChapters, getProfile, getProjects, getSkills } from "@/lib/data";
+import { getApacDoc, getBeyond, getExperiences, getLatestChapters, getProfile, getProjects, getSkills } from "@/lib/data";
 import { personLd, websiteLd } from "@/lib/jsonld";
 import { snippet } from "@/lib/seo";
 import { JsonLd } from "@/components/JsonLd";
@@ -30,13 +31,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [profile, experiences, projects, chapters, apac, skills] = await Promise.all([
+  const [profile, experiences, projects, chapters, apac, skills, beyond] = await Promise.all([
     getProfile(),
     getExperiences(),
     getProjects(),
     getLatestChapters(3),
     getApacDoc(),
     getSkills(),
+    getBeyond(),
   ]);
   const featured = projects.filter((p) => p.featuredOnCv);
   const earliest = experiences.reduce((m, e) => (e.startDate < m ? e.startDate : m), "2001-06-01");
@@ -92,7 +94,7 @@ export default async function HomePage() {
                 <PrintIcon /> Print / Save CV
               </PrintButton>
             </div>
-            <SocialLinks profile={profile} className="mt-8" />
+            <SocialLinks profile={profile} className="mt-8" hero />
           </div>
           <Portrait profile={profile} />
         </div>
@@ -222,6 +224,7 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+      <BeyondWork doc={beyond} profile={profile} />
     </>
   );
 }

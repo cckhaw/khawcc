@@ -54,9 +54,10 @@ const COMPANY_LOGOS: Record<string, string> = {
   Fortesys: "/img/companies/fortesys.png",
   "Ruckus Networks": "/img/companies/ruckus.png",
 };
-const exp = (o: Omit<ExpSeed, "sortOrder" | "isVisible" | "logoUrl">, i: number): Experience => ({
+const exp = (o: Omit<ExpSeed, "sortOrder" | "isVisible" | "logoUrl" | "logoUrl2">, i: number): Experience => ({
   ...o,
   logoUrl: COMPANY_LOGOS[o.company] ?? "",
+  logoUrl2: "",
   sortOrder: (i + 1) * 10,
   isVisible: true,
   id: i + 1,

@@ -35,6 +35,7 @@ export async function saveExperience(fd: FormData) {
     ...base,
     location: str(fd, "location"),
     logoUrl: safeLogo(str(fd, "logoUrl")),
+    logoUrl2: safeLogo(str(fd, "logoUrl2")),
     endDate: isCurrent ? null : monthToDate(str(fd, "endDate")),
     isCurrent,
     domainTag: str(fd, "domainTag") || "Telco & BSS",

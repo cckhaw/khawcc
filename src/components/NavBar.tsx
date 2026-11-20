@@ -10,7 +10,7 @@ const LINKS = [
   { href: "/", label: "Overview" },
   { href: "/cv", label: "Experience (CV)" },
   { href: "/projects", label: "Projects (*.khaw.cc)" },
-  { href: "/book", label: "Thinking in Signals" },
+  { href: "/book", label: "Book" },
 ];
 
 export function NavBar({ name }: { name: string }) {

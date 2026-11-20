@@ -17,12 +17,27 @@ const OAUTH = "https://www.strava.com/oauth";
 export type StravaAuth = { accessToken: string; refreshToken: string; expiresAt: number; athleteId: number; athleteName: string };
 
 export const stravaConfigured = () => Boolean(process.env.STRAVA_CLIENT_ID && process.env.STRAVA_CLIENT_SECRET);
-export const redirectUri = () => `${SITE_URL}/api/admin/strava/callback`;
+export const CALLBACK_PATH = "/api/admin/strava/callback";
+export const redirectUri = (origin: string = SITE_URL) => `${origin}${CALLBACK_PATH}`;
 
-export function authorizeUrl(state: string): string {
+/**
+ * The admin may be opened on the main domain or on the project's *.vercel.app address; Strava only accepts
+ * the one domain registered in the app, so the callback uses whichever address the admin started from.
+ */
+export function allowedOrigin(origin: string): boolean {
+  try {
+    const u = new URL(origin);
+    const site = new URL(SITE_URL);
+    return u.host === site.host || u.host === site.host.replace(/^www\./, "") || u.hostname.endsWith(".vercel.app") || u.hostname === "localhost";
+  } catch {
+    return false;
+  }
+}
+
+export function authorizeUrl(state: string, origin: string = SITE_URL): string {
   const q = new URLSearchParams({
     client_id: process.env.STRAVA_CLIENT_ID ?? "",
-    redirect_uri: redirectUri(),
+    redirect_uri: redirectUri(origin),
     response_type: "code",
     approval_prompt: "auto",
     // activity:read_all so private activities are counted too; only totals are stored.

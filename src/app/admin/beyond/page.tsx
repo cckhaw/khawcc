@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { BeyondEditor } from "@/components/admin/BeyondEditor";
 import { ConfirmButton } from "@/components/admin/ui";
@@ -5,7 +6,7 @@ import { hasDb } from "@/db";
 import { disconnectStrava, syncStravaNow } from "@/lib/actions/beyond";
 import { requireAdmin } from "@/lib/auth";
 import { getBeyond } from "@/lib/data";
-import { getAuth, redirectUri, stravaConfigured } from "@/lib/strava";
+import { getAuth, stravaConfigured } from "@/lib/strava";
 
 export const metadata = { title: "Beyond the desk" };
 
@@ -22,6 +23,8 @@ export default async function AdminBeyond({ searchParams }: { searchParams: Prom
   await requireAdmin();
   const sp = await searchParams;
   const doc = await getBeyond();
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
   const configured = stravaConfigured();
   const auth = configured && hasDb() ? await getAuth().catch(() => null) : null;
   const note = sp.strava === "error" ? { tone: "warn" as const, text: `Strava error: ${sp.msg ?? "something went wrong"}` } : sp.strava ? NOTE[sp.strava] : undefined;
@@ -46,7 +49,7 @@ export default async function AdminBeyond({ searchParams }: { searchParams: Prom
           <div className="mt-2 space-y-2 text-sm text-muted">
             <p>One-time setup to let the site read your Strava totals every day:</p>
             <ol className="list-decimal space-y-1 pl-5">
-              <li>Create an app at <a className="text-accent underline underline-offset-2" href="https://www.strava.com/settings/api" target="_blank" rel="noopener noreferrer">strava.com/settings/api</a> and set its <em>Authorization Callback Domain</em> to <code className="font-mono text-xs">{new URL(redirectUri()).host}</code>.</li>
+              <li>Create an app at <a className="text-accent underline underline-offset-2" href="https://www.strava.com/settings/api" target="_blank" rel="noopener noreferrer">strava.com/settings/api</a> and set its <em>Authorization Callback Domain</em> to <code className="font-mono text-xs">{host}</code> (just the domain, no https://).</li>
               <li>In Vercel (Project, Settings, Environment Variables) add <code className="font-mono text-xs">STRAVA_CLIENT_ID</code>, <code className="font-mono text-xs">STRAVA_CLIENT_SECRET</code> and <code className="font-mono text-xs">CRON_SECRET</code> (any long random text), then redeploy.</li>
               <li>Come back here and press <strong>Connect Strava</strong>.</li>
             </ol>
@@ -65,6 +68,10 @@ export default async function AdminBeyond({ searchParams }: { searchParams: Prom
           <div className="mt-2 space-y-3 text-sm">
             <p className="text-muted">Not connected yet. You&rsquo;ll be sent to Strava to approve read-only access to your activities; only the four totals are stored.</p>
             <a href="/api/admin/strava/connect" className="btn btn-primary btn-sm">Connect Strava</a>
+            <p className="text-xs text-dim">
+              Strava will send you back to <code className="font-mono">{host}</code>, so that exact domain must be the &ldquo;Authorization Callback Domain&rdquo; in your Strava app. If it shows
+              &ldquo;redirect_uri invalid&rdquo;, either change the domain in Strava or open this page from the address you registered there.
+            </p>
           </div>
         )}
       </section>

@@ -175,8 +175,8 @@ export default async function HomePage() {
           eyebrow="Career"
           title="Featured career highlights"
           action={
-            <Link href="/cv" className="hidden items-center gap-1.5 text-sm text-muted hover:text-fg sm:inline-flex">
-              Full CV <ArrowRight />
+            <Link href="/cv" className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm font-medium text-muted transition hover:text-accent">
+              View all <ArrowRight />
             </Link>
           }
         />
@@ -193,8 +193,8 @@ export default async function HomePage() {
           eyebrow="The Lab"
           title="Featured *.khaw.cc builds"
           action={
-            <Link href="/projects" className="hidden items-center gap-1.5 text-sm text-muted hover:text-fg sm:inline-flex">
-              All projects <ArrowRight />
+            <Link href="/projects" className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm font-medium text-muted transition hover:text-accent">
+              View all <ArrowRight />
             </Link>
           }
         />
@@ -209,11 +209,11 @@ export default async function HomePage() {
       {chapters.length > 0 && (
         <section className="mx-auto mt-24 max-w-6xl px-5 sm:px-8">
           <SectionHeader
-            eyebrow="Work in progress"
+            eyebrow="Book"
             title="Latest from Thinking in Signals"
             action={
-              <Link href="/book" className="hidden items-center gap-1.5 text-sm text-muted hover:text-fg sm:inline-flex">
-                Table of contents <ArrowRight />
+              <Link href="/book" className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm font-medium text-muted transition hover:text-accent">
+                View all <ArrowRight />
               </Link>
             }
           />

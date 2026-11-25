@@ -6,7 +6,6 @@ import { CountUp } from "@/components/CountUp";
 import { Reveal } from "@/components/Reveal";
 import { BeyondWork } from "@/components/BeyondWork";
 import { ChapterCard } from "@/components/ChapterCard";
-import { ExperienceSnippet } from "@/components/ExperienceRow";
 import { SocialLinks } from "@/components/Footer";
 import { ArrowRight, PrintIcon } from "@/components/icons";
 import { Markdown } from "@/components/Markdown";
@@ -170,7 +169,7 @@ export default async function HomePage() {
             </Link>
           }
         />
-        <Reveal className="mb-8">
+        <Reveal>
           <CareerRoute
             roles={experiences.map((e) => ({
               id: e.id,
@@ -186,13 +185,6 @@ export default async function HomePage() {
             }))}
           />
         </Reveal>
-        <div className="grid gap-4 md:grid-cols-3">
-          {experiences.slice(0, 3).map((e, n) => (
-            <Reveal key={e.id} delay={n * 100}>
-              <ExperienceSnippet e={e} />
-            </Reveal>
-          ))}
-        </div>
       </section>
 
       {/* ---------------- Featured builds ---------------- */}

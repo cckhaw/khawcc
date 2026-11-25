@@ -44,7 +44,7 @@ export function ApacMapEditor({ initial }: { initial: ApacDoc }) {
   function addItem() {
     setDoc((d) => ({
       ...d,
-      items: [...d.items, { id: `n-${Date.now().toString(36)}`, text: "", place: "", current: false, visible: true, x: MAP_W / 2, y: MAP_H / 2 }],
+      items: [...d.items, { id: `n-${Date.now().toString(36)}`, text: "", place: "", tag: "", current: false, visible: true, x: MAP_W / 2, y: MAP_H / 2 }],
     }));
     setSel(doc.items.length);
   }
@@ -59,6 +59,7 @@ export function ApacMapEditor({ initial }: { initial: ApacDoc }) {
     <form action={saveApacMap} className="space-y-8">
       <style dangerouslySetInnerHTML={{ __html: APAC_BASE_CSS }} />
       <input type="hidden" name="doc" value={JSON.stringify(doc)} />
+      <datalist id="apac-tags">{Array.from(new Set(doc.items.map((x) => x.tag).filter(Boolean))).map((t) => <option key={t} value={t} />)}</datalist>
 
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_1.05fr]">
         {/* ---- Map: drag pins, or click to place the selected pin ---- */}
@@ -146,6 +147,7 @@ export function ApacMapEditor({ initial }: { initial: ApacDoc }) {
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px]">
                   <input className="field !w-40 !py-1.5" aria-label="Place" placeholder="Place" value={it.place} maxLength={60} onChange={(e) => setItem(i, { place: e.target.value })} />
+                  <input className="field !w-52 !py-1.5" aria-label="Theme" placeholder="Theme (filter chip)" list="apac-tags" value={it.tag} maxLength={40} onChange={(e) => setItem(i, { tag: e.target.value })} />
                   <label className="flex items-center gap-1.5"><input type="checkbox" checked={it.current} onChange={(e) => setItem(i, { current: e.target.checked })} /> Highlight (now)</label>
                   <label className="flex items-center gap-1.5"><input type="checkbox" checked={it.visible} onChange={(e) => setItem(i, { visible: e.target.checked })} /> Visible</label>
                   <details className="text-dim">

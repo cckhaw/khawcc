@@ -33,7 +33,7 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
 };
 
-const themeScript = `try{var t=localStorage.getItem('theme');document.documentElement.dataset.theme=t==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}`;
+const themeScript = `document.documentElement.classList.add('js');try{var t=localStorage.getItem('theme');document.documentElement.dataset.theme=t==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}`;
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const profile = await getProfile();

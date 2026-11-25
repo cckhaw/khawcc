@@ -5,6 +5,8 @@ export type ApacItem = {
   text: string;
   /** Short place label, used for the pin's accessible name. */
   place: string;
+  /** Optional theme used by the filter chips on the home page (e.g. "Prepaid & charging"). */
+  tag: string;
   /** Highlight (coral) as the current / most recent engagement. */
   current: boolean;
   visible: boolean;
@@ -40,6 +42,7 @@ export function sanitizeApacDoc(input: unknown): ApacDoc {
         id: str(o.id, 40) || `item-${i}`,
         text,
         place: str(o.place, 60),
+        tag: str(o.tag, 40),
         current: Boolean(o.current),
         visible: o.visible !== false,
         x: Math.round(clamp(o.x, 0, MAP_W, MAP_W / 2) * 10) / 10,

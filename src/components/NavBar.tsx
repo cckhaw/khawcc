@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CloseIcon, MenuIcon } from "./icons";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -17,6 +17,31 @@ export function NavBar({ name }: { name: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [admin, setAdmin] = useState(false);
+  const bar = useRef<HTMLDivElement>(null);
+
+  // Thin reading-progress line under the bar (chapters have their own reader progress, so skip those).
+  useEffect(() => {
+    const el = bar.current;
+    if (!el) return;
+    let raf = 0;
+    const update = () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      el.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, h.scrollTop / max)) : 0})`;
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     let alive = true;
@@ -33,6 +58,14 @@ export function NavBar({ name }: { name: string }) {
 
   return (
     <header className="no-print sticky top-0 z-50 border-b border-line bg-[var(--nav)] backdrop-blur-xl backdrop-saturate-150">
+      {!pathname.startsWith("/book/") && !pathname.startsWith("/admin") && (
+        <div
+          ref={bar}
+          aria-hidden
+          className="pointer-events-none absolute -bottom-px left-0 h-[2px] w-full origin-left"
+          style={{ background: "linear-gradient(90deg, var(--accent), var(--accent-2))", transform: "scaleX(0)" }}
+        />
+      )}
       <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8" aria-label="Primary">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight" onClick={() => setOpen(false)}>
           <span className="font-display text-[17px] font-semibold tracking-tight">{name}</span>

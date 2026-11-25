@@ -1,7 +1,7 @@
 // Builds src/data/apac-map.json: simplified APAC land + border paths and projected pin positions.
 // Run once: node scripts/build-apac-map.mjs   (devDeps: d3-geo, topojson-client, world-atlas)
 import { readFileSync, writeFileSync } from "node:fs";
-import { geoMercator, geoPath } from "d3-geo";
+import { geoContains, geoMercator, geoPath } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import { presimplify, simplify, quantile } from "topojson-simplify";
 
@@ -52,7 +52,22 @@ const pins = {
   O: { lonlat: [80.77, 7.87], dx: 0, dy: 0 }, // Sri Lanka
   P: { lonlat: [101.69, 3.14], dx: -16, dy: 0 }, // Maxis, Kuala Lumpur
 };
+// Dot-matrix land for the animated atlas: a hex-ish lattice of dots inside the land, split into
+// vertical bands so the site can reveal it left to right.
+const landGeo = feature(world, world.objects.land);
+const BANDS = 16;
+const chunks = Array.from({ length: BANDS }, () => []);
+for (let r = 0; 8 + r * 10 < H - 4; r++) {
+  const y = 8 + r * 10;
+  for (let c = 0; ; c++) {
+    const x = 8 + c * 10 + (r % 2 ? 5 : 0);
+    if (x > W - 4) break;
+    const ll = projection.invert([x, y]);
+    if (ll && Number.isFinite(ll[0]) && geoContains(landGeo, ll)) chunks[Math.min(BANDS - 1, Math.floor(x / (W / BANDS)))].push(`M${x} ${y}h0`);
+  }
+}
 const out = { width: W, height: H, land: path(land), borders: path(borders), pins: {} };
+writeFileSync("src/data/apac-dots.json", JSON.stringify(chunks.map((c) => c.join(""))));
 for (const [id, p] of Object.entries(pins)) {
   const [x, y] = projection(p.lonlat);
   out.pins[id] = [Math.round((x + p.dx) * 10) / 10, Math.round((y + p.dy) * 10) / 10];

@@ -43,12 +43,33 @@ export const APAC_PROJECTS: ApacProject[] = [
 
 const pins = map.pins as Record<string, number[]>;
 
+/** Theme per project letter (drives the filter chips on the home page). */
+const TAGS: Record<string, string> = {
+  A: "Platforms & transformation",
+  P: "Platforms & transformation",
+  D: "Prepaid & charging",
+  E: "Prepaid & charging",
+  G: "Prepaid & charging",
+  H: "Prepaid & charging",
+  K: "Prepaid & charging",
+  B: "Wi-Fi & roaming",
+  C: "Wi-Fi & roaming",
+  F: "Wi-Fi & roaming",
+  I: "Wi-Fi & roaming",
+  L: "Wi-Fi & roaming",
+  M: "Wi-Fi & roaming",
+  N: "Wi-Fi & roaming",
+  J: "Policy control",
+  O: "Policy control",
+};
+
 export const DEFAULT_APAC_DOC: ApacDoc = {
   stats: APAC_STATS,
   items: APAC_PROJECTS.map((p) => ({
     id: `seed-${p.id}`,
     text: p.text,
     place: p.place,
+    tag: TAGS[p.id] ?? "",
     current: Boolean(p.current),
     visible: true,
     x: pins[p.id][0],

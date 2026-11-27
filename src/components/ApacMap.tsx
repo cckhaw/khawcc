@@ -1,25 +1,13 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import map from "@/data/apac-map.json";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { labelFor, layoutPins, MAP_H, MAP_W, PIN_SCALE, type ApacDoc, type ApacItem } from "@/lib/apac";
 
 export const PIN_PATH = "M0 0C-6 -9 -13 -14 -13 -22a13 13 0 1 1 26 0C13 -14 6 -9 0 0Z";
 export const MAP_LAND = map.land;
 export const MAP_BORDERS = map.borders;
-
-/** True when the visitor asked their device for reduced motion. */
-function useReducedMotion(): boolean {
-  return useSyncExternalStore(
-    (cb) => {
-      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-      mq.addEventListener("change", cb);
-      return () => mq.removeEventListener("change", cb);
-    },
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    () => false,
-  );
-}
 
 /** Palette, hover links and the glow / breathing animation (no JS needed for hover). */
 const makeCss = (n: number) => {

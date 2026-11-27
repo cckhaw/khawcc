@@ -446,14 +446,13 @@ select.field option {
   display: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  * {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-  }
+[data-motion="off"] html,
+:root[data-motion="off"] {
+  scroll-behavior: auto;
+}
+:root[data-motion="off"] * {
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
 }
 
 /* Reader typeface toggle */
@@ -526,15 +525,14 @@ select.field option {
 .rise-3 { animation-delay: 0.32s; }
 .rise-4 { animation-delay: 0.46s; }
 .rise-5 { animation-delay: 0.6s; }
-@media (prefers-reduced-motion: reduce) {
-  .js .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  .rise {
-    animation: none;
-  }
+[data-motion="off"] .js .reveal,
+.js[data-motion="off"] .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+[data-motion="off"] .rise {
+  animation: none;
 }
 @media print {
   .reveal {
@@ -552,8 +550,6 @@ select.field option {
 .route-card {
   animation: route-card-in 0.35s ease-out backwards;
 }
-@media (prefers-reduced-motion: reduce) {
-  .route-card {
-    animation: none;
-  }
+[data-motion="off"] .route-card {
+  animation: none;
 }

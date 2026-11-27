@@ -12,7 +12,7 @@ export function Reveal({ children, className = "", delay = 0, as: Tag = "div" }:
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!("IntersectionObserver" in window) || document.documentElement.dataset.motion === "off") {
       el.classList.add("in");
       return;
     }

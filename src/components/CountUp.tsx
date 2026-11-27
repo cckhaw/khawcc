@@ -12,7 +12,7 @@ export function CountUp({ value, duration = 1500, className }: { value: string; 
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || !m || !("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!el || !m || !("IntersectionObserver" in window) || document.documentElement.dataset.motion === "off") return;
     const target = Number(m[2].replace(/,/g, ""));
     const decimals = (m[2].split(".")[1] ?? "").length;
     const withCommas = m[2].includes(",");

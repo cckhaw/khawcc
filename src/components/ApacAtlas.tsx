@@ -334,7 +334,7 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
                 <span>{[sel.place, sel.tag].filter(Boolean).join(" · ")}</span>
                 {sel.current && <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-bg">NOW</span>}
               </div>
-              <p key={selected} className="mt-4 text-[1.05rem] leading-snug lg:text-[1.7rem] lg:leading-[1.25]" style={{ animation: reduced ? undefined : "route-card-in .35s ease-out backwards" }}>
+              <p key={selected} className="mt-4 text-base leading-relaxed" style={{ animation: reduced ? undefined : "route-card-in .35s ease-out backwards" }}>
                 {sel.text}
               </p>
               <div className="mt-5 flex items-center gap-2 lg:mt-auto lg:pt-6">

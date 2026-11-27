@@ -120,12 +120,6 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
       setRegion(r ? r.key : "all");
     }
   }
-  /** From the list under the map: select it, and bring the map back into view if it has scrolled away. */
-  function pick(i: number) {
-    choose(i);
-    const r = wrap.current?.getBoundingClientRect();
-    if (r && (r.bottom < 80 || r.top > window.innerHeight - 80)) wrap.current?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
-  }
   function step(dir: 1 | -1) {
     const order = items.map((_, i) => i).filter(match);
     if (!order.length) return;
@@ -190,7 +184,7 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
           )}
         </div>
 
-        <div className="grid items-start gap-8 lg:grid-cols-[1.3fr_1fr]">
+        <div className="grid items-start gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-stretch">
           {/* ---------------- map ---------------- */}
           <div ref={wrap} className="relative overflow-hidden rounded-3xl border" style={{ borderColor: "var(--atlas-line)", background: "var(--card)" }}>
             <svg
@@ -329,7 +323,7 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
             )}
             {/* selected project */}
             <div
-              className="order-first rounded-3xl border p-5 lg:order-none"
+              className="order-first flex flex-col rounded-3xl border p-5 lg:order-none lg:flex-1 lg:p-8"
               style={{ borderColor: "var(--atlas-line)", background: "var(--atlas-card)" }}
               aria-live="polite"
             >
@@ -340,38 +334,23 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
                 <span>{[sel.place, sel.tag].filter(Boolean).join(" · ")}</span>
                 {sel.current && <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-bg">NOW</span>}
               </div>
-              <p key={selected} className="mt-3 text-[0.95rem] leading-snug lg:text-lg" style={{ animation: reduced ? undefined : "route-card-in .35s ease-out backwards" }}>
+              <p key={selected} className="mt-4 text-[1.05rem] leading-snug lg:text-[1.7rem] lg:leading-[1.25]" style={{ animation: reduced ? undefined : "route-card-in .35s ease-out backwards" }}>
                 {sel.text}
               </p>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-5 flex items-center gap-2 lg:mt-auto lg:pt-6">
                 <button type="button" className="chip !px-3 !py-1" onClick={() => step(-1)} aria-label="Previous project">
                   ←
                 </button>
                 <button type="button" className="chip !px-3 !py-1" onClick={() => step(1)} aria-label="Next project">
                   →
                 </button>
+                <span className="ml-2 text-xs" style={{ color: "var(--atlas-soft)" }}>
+                  {selected + 1} of {items.length}
+                </span>
               </div>
             </div>
           </div>
         </div>
-
-        {/* all projects, full width so nothing needs an inner scrollbar */}
-        <ul className="mt-8 space-y-1 lg:columns-2 lg:gap-x-10">
-          {items.map((it, i) => (
-            <li key={it.id} className="break-inside-avoid" style={{ opacity: match(i) ? 1 : 0.35, transition: "opacity .3s" }}>
-              <button type="button" className="row" aria-pressed={i === selected} onClick={() => pick(i)}>
-                <span className="w-5 shrink-0 font-bold" style={{ color: it.current ? "var(--accent)" : "var(--fg)" }}>
-                  {labelFor(i)}
-                </span>
-                <span className="min-w-0" style={{ color: "var(--atlas-ink)" }}>
-                  {it.text}
-                  {it.current && <span className="ml-2 inline-block rounded-full bg-accent px-2 py-0.5 align-middle text-[10px] font-bold text-bg">NOW</span>}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-
       </div>
       {/* viewBox attribute is driven imperatively above; MAP_H is only used to document the full extent */}
       <span hidden data-extent={`${MAP_W}x${MAP_H}`} data-dur={dur} />

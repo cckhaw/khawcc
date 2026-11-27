@@ -56,7 +56,7 @@ export function ApacMapEditor({ initial }: { initial: ApacDoc }) {
   })();
 
   return (
-    <form action={saveApacMap} className="space-y-8">
+    <form action={saveApacMap} noValidate className="space-y-8">
       <style dangerouslySetInnerHTML={{ __html: APAC_BASE_CSS }} />
       <input type="hidden" name="doc" value={JSON.stringify(doc)} />
       <datalist id="apac-tags">{Array.from(new Set(doc.items.map((x) => x.tag).filter(Boolean))).map((t) => <option key={t} value={t} />)}</datalist>
@@ -153,8 +153,8 @@ export function ApacMapEditor({ initial }: { initial: ApacDoc }) {
                   <details className="text-dim">
                     <summary className="cursor-pointer">Position</summary>
                     <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-xs">
-                      X <input type="number" className="field !w-20 !py-1" value={it.x} min={0} max={MAP_W} step={1} onChange={(e) => setItem(i, { x: round(clampX(Number(e.target.value))) })} />
-                      Y <input type="number" className="field !w-20 !py-1" value={it.y} min={0} max={MAP_H} step={1} onChange={(e) => setItem(i, { y: round(clampY(Number(e.target.value))) })} />
+                      X <input type="number" className="field !w-20 !py-1" value={it.x} min={0} max={MAP_W} step="any" onChange={(e) => setItem(i, { x: round(clampX(Number(e.target.value))) })} />
+                      Y <input type="number" className="field !w-20 !py-1" value={it.y} min={0} max={MAP_H} step="any" onChange={(e) => setItem(i, { y: round(clampY(Number(e.target.value))) })} />
                     </div>
                   </details>
                   <button

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dots from "@/data/apac-dots.json";
 import { labelFor, layoutPins, MAP_H, MAP_W, type ApacDoc } from "@/lib/apac";
-import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { setMotionOff, useReducedMotion } from "@/lib/use-reduced-motion";
 import { PinShape } from "./ApacMap";
 import { CountUp } from "./CountUp";
 import { ArrowRight } from "./icons";
@@ -20,17 +20,18 @@ const REGIONS: { key: string; label: string; vb: VB }[] = [
 const PIN = 1.7; // pin size in map units at the widest zoom
 
 const CSS = `
-.atlas{--atlas-ink:#eaf3f8;--atlas-soft:#9fbccd;--atlas-dot:rgba(160,210,240,.72);--atlas-arc:#ff9c7d;--atlas-card:rgba(8,28,40,.78);--atlas-line:rgba(160,205,235,.2);--apac-pin:#2f86b0;--apac-hot:#ff7a55;color:var(--atlas-ink);background:radial-gradient(60rem 30rem at 85% -10%,rgba(60,150,190,.28),transparent 60%),radial-gradient(40rem 24rem at 0% 100%,rgba(255,122,85,.12),transparent 60%),linear-gradient(165deg,#0a202d 0%,#0f3043 55%,#0b2431 100%)}
-.atlas .chip{border:1px solid var(--atlas-line);border-radius:999px;padding:.38rem .9rem;font-size:.8rem;color:var(--atlas-soft);background:rgba(255,255,255,.04);transition:background .2s,color .2s,border-color .2s}
-.atlas .chip:hover{color:#fff;border-color:rgba(255,255,255,.4)}
-.atlas .chip[aria-pressed=true]{background:#eaf3f8;color:#0a202d;border-color:#eaf3f8;font-weight:600}
+.atlas{--atlas-ink:var(--fg);--atlas-soft:var(--muted);--atlas-dot:rgba(34,29,25,.3);--atlas-arc:var(--accent);--atlas-pulse:var(--accent-2);--atlas-card:var(--card);--atlas-line:var(--line);--atlas-well:rgba(34,29,25,.035);--apac-pin:#2f6f8f;--apac-hot:var(--accent);color:var(--atlas-ink)}
+:root[data-theme=dark] .atlas{--atlas-dot:rgba(255,238,220,.38);--atlas-well:rgba(255,238,220,.04);--apac-pin:#4d9cc4;--atlas-pulse:#fff}
+.atlas .chip{border:1px solid var(--line-strong);border-radius:999px;padding:.38rem .9rem;font-size:.8rem;color:var(--muted);background:var(--card);transition:background .2s,color .2s,border-color .2s}
+.atlas .chip:hover{color:var(--fg);border-color:var(--fg)}
+.atlas .chip[aria-pressed=true]{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:600}
 .atlas .row{display:flex;width:100%;gap:.75rem;border-radius:.7rem;padding:.55rem .7rem;text-align:left;font-size:.9rem;line-height:1.4;transition:background .2s,opacity .3s,box-shadow .2s}
-.atlas .row:hover{background:rgba(255,255,255,.06)}
-.atlas .row[aria-pressed=true]{background:rgba(255,255,255,.09);box-shadow:inset 3px 0 0 #ff7a55}
+.atlas .row:hover{background:var(--atlas-well)}
+.atlas .row[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
 .atlas .pin-body{transform-box:fill-box;transform-origin:50% 100%;transition:transform .2s ease}
 .atlas .pin:hover .pin-body,.atlas .pin:focus-visible .pin-body{transform:scale(1.18)}
 .atlas .pin:focus-visible{outline:none}
-.atlas .pin:focus-visible .pin-body{filter:drop-shadow(0 0 4px #fff)}
+.atlas .pin:focus-visible .pin-body{filter:drop-shadow(0 0 4px var(--fg))}
 `;
 
 const clamp = (n: number, a: number, b: number) => Math.min(b, Math.max(a, n));
@@ -146,23 +147,28 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
   const dur = reduced ? "0s" : undefined;
 
   return (
-    <section className="atlas relative overflow-hidden" aria-labelledby="apac-title">
+    <section className="atlas relative" aria-labelledby="apac-title">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
-            <p className="text-[0.8rem] font-semibold tracking-wide text-[#ff9c7d]">Selected work</p>
-            <h2 id="apac-title" className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-4xl">
+            <p className="eyebrow">Selected work</p>
+            <h2 id="apac-title" className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
               Telecom &amp; digital transformation across APAC
             </h2>
-            <p className="mt-3 leading-relaxed text-[color:var(--atlas-soft)]">
+            <p className="mt-3 leading-relaxed text-muted">
               Signals sent from Kuala Lumpur across the region: Wi-Fi roaming hubs, policy managers, prepaid migrations, MVNE platforms, and the Maxis
               transformation I&rsquo;m leading now. Tap a pin, filter by theme, or zoom into a region.
             </p>
           </div>
-          <Link href="/apac-map" className="no-print inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-medium text-[color:var(--atlas-soft)] transition hover:text-white">
-            Get the shareable image <ArrowRight />
-          </Link>
+          <div className="no-print flex flex-wrap items-center gap-x-5 gap-y-2">
+            <button type="button" className="text-sm font-medium text-muted transition hover:text-accent" aria-pressed={reduced} onClick={() => setMotionOff(!reduced)}>
+              {reduced ? "▶ Play animations" : "⏸ Pause animations"}
+            </button>
+            <Link href="/apac-map" className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-medium text-muted transition hover:text-accent">
+              Get the shareable image <ArrowRight />
+            </Link>
+          </div>
         </div>
 
         {/* controls */}
@@ -190,7 +196,7 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
 
         <div className="grid items-start gap-8 lg:grid-cols-[1.3fr_1fr]">
           {/* ---------------- map ---------------- */}
-          <div ref={wrap} className="relative overflow-hidden rounded-3xl border" style={{ borderColor: "var(--atlas-line)", background: "rgba(5,20,30,.45)" }}>
+          <div ref={wrap} className="relative overflow-hidden rounded-3xl border" style={{ borderColor: "var(--atlas-line)", background: "var(--card)" }}>
             <svg
               ref={svg}
               viewBox={REGIONS[0].vb.join(" ")}
@@ -235,7 +241,7 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
                       }}
                     />
                     {!reduced && inView && !dim && (
-                      <circle r={(on ? 4.6 : 3.2) * z} fill="#fff" opacity="0">
+                      <circle r={(on ? 4.6 : 3.2) * z} fill="var(--atlas-pulse)" opacity="0">
                         <animateMotion dur={`${on ? 2.2 : 3.4 + (i % 5) * 0.55}s`} begin={`${2 + ((i * 0.43) % 2.6)}s`} repeatCount="indefinite" path={d} />
                         <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.85;1" dur={`${on ? 2.2 : 3.4 + (i % 5) * 0.55}s`} begin={`${2 + ((i * 0.43) % 2.6)}s`} repeatCount="indefinite" />
                       </circle>
@@ -248,8 +254,8 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
               {items.map((it, i) =>
                 Math.hypot(shown[i].x - it.x, shown[i].y - it.y) > 3 * z ? (
                   <g key={`lead-${it.id}`} pointerEvents="none" style={{ opacity: inView && match(i) ? 1 : 0, transition: "opacity .4s" }}>
-                    <line x1={it.x} y1={it.y} x2={shown[i].x} y2={shown[i].y} stroke="#fff" strokeOpacity=".5" strokeWidth={1.4 * z} />
-                    <circle cx={it.x} cy={it.y} r={3 * z} fill="#fff" />
+                    <line x1={it.x} y1={it.y} x2={shown[i].x} y2={shown[i].y} stroke="var(--fg)" strokeOpacity=".45" strokeWidth={1.4 * z} />
+                    <circle cx={it.x} cy={it.y} r={3 * z} fill="var(--fg)" />
                   </g>
                 ) : null,
               )}
@@ -315,13 +321,13 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
               aria-live="polite"
             >
               <div className="flex items-center gap-2 text-xs" style={{ color: "var(--atlas-soft)" }}>
-                <span className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: sel.current ? "#ff7a55" : "#2f86b0", color: sel.current ? "#0a202d" : "#fff" }}>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: sel.current ? "var(--accent)" : "var(--apac-pin)", color: sel.current ? "var(--bg)" : "#fff" }}>
                   {labelFor(selected)}
                 </span>
                 <span>{[sel.place, sel.tag].filter(Boolean).join(" · ")}</span>
-                {sel.current && <span className="rounded-full bg-[#ff7a55] px-2 py-0.5 text-[10px] font-bold text-[#0a202d]">NOW</span>}
+                {sel.current && <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-bg">NOW</span>}
               </div>
-              <p key={selected} className="mt-2 text-[0.92rem] leading-snug text-white" style={{ animation: reduced ? undefined : "route-card-in .35s ease-out backwards" }}>
+              <p key={selected} className="mt-2 text-[0.92rem] leading-snug" style={{ animation: reduced ? undefined : "route-card-in .35s ease-out backwards" }}>
                 {sel.text}
               </p>
               <div className="mt-3 flex gap-2">
@@ -340,8 +346,8 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
             {doc.stats.length > 0 && (
               <ul className="mb-5 grid gap-3 text-center" style={{ gridTemplateColumns: `repeat(${doc.stats.length}, minmax(0, 1fr))` }}>
                 {doc.stats.map((s) => (
-                  <li key={s.label} className="rounded-2xl border px-2 py-4" style={{ borderColor: "var(--atlas-line)", background: "rgba(255,255,255,.04)" }}>
-                    <p className="font-display text-2xl font-semibold leading-none text-white sm:text-3xl">
+                  <li key={s.label} className="rounded-2xl border px-2 py-4" style={{ borderColor: "var(--atlas-line)", background: "var(--card)" }}>
+                    <p className="font-display text-2xl font-semibold leading-none text-accent sm:text-3xl">
                       <CountUp value={s.value} />
                     </p>
                     <p className="mt-2 text-[11px] font-medium uppercase tracking-wide" style={{ color: "var(--atlas-soft)" }}>
@@ -351,16 +357,16 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
                 ))}
               </ul>
             )}
-            <ul ref={list} className="relative max-h-[30rem] space-y-1 overflow-y-auto pr-1 [scrollbar-width:thin]" style={{ scrollbarColor: "rgba(255,255,255,.25) transparent" }}>
+            <ul ref={list} className="relative max-h-[30rem] space-y-1 overflow-y-auto pr-1 [scrollbar-width:thin]" style={{ scrollbarColor: "var(--line-strong) transparent" }}>
               {items.map((it, i) => (
                 <li key={it.id} style={{ opacity: match(i) ? 1 : 0.35, transition: "opacity .3s" }}>
                   <button type="button" className="row" aria-pressed={i === selected} onClick={() => choose(i)}>
-                    <span className="w-5 shrink-0 font-bold" style={{ color: it.current ? "#ff9c7d" : "#fff" }}>
+                    <span className="w-5 shrink-0 font-bold" style={{ color: it.current ? "var(--accent)" : "var(--fg)" }}>
                       {labelFor(i)}
                     </span>
                     <span className="min-w-0" style={{ color: "var(--atlas-ink)" }}>
                       {it.text}
-                      {it.current && <span className="ml-2 inline-block rounded-full bg-[#ff7a55] px-2 py-0.5 align-middle text-[10px] font-semibold text-white">NOW</span>}
+                      {it.current && <span className="ml-2 inline-block rounded-full bg-accent px-2 py-0.5 align-middle text-[10px] font-bold text-bg">NOW</span>}
                     </span>
                   </button>
                 </li>

@@ -121,20 +121,44 @@ async function fetchAllActivities(token: string): Promise<Activity[]> {
 }
 
 /** Read Strava, then rewrite the numbers in the "Beyond the desk" document. */
+/** Fail with a named step instead of letting the platform kill the function silently after 60 s. */
+async function step<T>(name: string, ms: number, run: () => Promise<T>): Promise<T> {
+  const t0 = Date.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const out = await Promise.race([
+      run(),
+      new Promise<never>((_, rej) => {
+        timer = setTimeout(() => rej(new Error(`Strava sync step "${name}" took longer than ${ms / 1000}s.`)), ms);
+      }),
+    ]);
+    console.log(`[strava] ${name} ok in ${Date.now() - t0}ms`);
+    return out;
+  } catch (e) {
+    console.error(`[strava] ${name} failed after ${Date.now() - t0}ms: ${e instanceof Error ? e.message : e}`);
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function syncStrava(): Promise<{ totals: Totals; syncedAt: string }> {
   if (!stravaConfigured()) throw new Error("STRAVA_CLIENT_ID / STRAVA_CLIENT_SECRET are not set.");
-  const auth = await getAuth();
+  const auth = await step("read saved Strava login (database)", 15000, () => getAuth());
   if (!auth) throw new Error("Strava is not connected yet. Connect it in /admin/beyond.");
-  const totals = aggregateActivities(await fetchAllActivities(await accessToken(auth)));
+  const token = await step("get Strava access token", 20000, () => accessToken(auth));
+  const totals = aggregateActivities(await step("download activities from Strava", 40000, () => fetchAllActivities(token)));
 
   const db = requireDb();
-  const [row] = await db.select().from(schema.siteContent).where(eq(schema.siteContent.key, BEYOND_KEY));
+  const [row] = await step("read page settings (database)", 15000, () => db.select().from(schema.siteContent).where(eq(schema.siteContent.key, BEYOND_KEY)));
   const doc = row ? sanitizeBeyond(row.value) : DEFAULT_BEYOND;
   const syncedAt = new Date().toISOString();
   const next = { ...doc, stats: totalsToStats(totals), strava: { auto: true, syncedAt } };
-  await db
-    .insert(schema.siteContent)
-    .values({ key: BEYOND_KEY, value: next })
-    .onConflictDoUpdate({ target: schema.siteContent.key, set: { value: next, updatedAt: new Date() } });
+  await step("save new numbers (database)", 15000, async () => {
+    await db
+      .insert(schema.siteContent)
+      .values({ key: BEYOND_KEY, value: next })
+      .onConflictDoUpdate({ target: schema.siteContent.key, set: { value: next, updatedAt: new Date() } });
+  });
   return { totals, syncedAt };
 }

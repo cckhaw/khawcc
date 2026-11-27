@@ -4,6 +4,8 @@ import { syncStrava } from "@/lib/strava";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+// Same region as the database (Singapore) so each query is fast.
+export const preferredRegion = "sin1";
 
 /** Daily job (see vercel.json crons). Vercel sends `Authorization: Bearer $CRON_SECRET`. */
 export async function GET(req: Request) {

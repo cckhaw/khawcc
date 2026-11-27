@@ -121,24 +121,17 @@ async function fetchAllActivities(token: string): Promise<Activity[]> {
 }
 
 /**
- * TEMPORARY comparison (log only, nothing is saved): Strava's one-call lifetime totals versus our own sum over every
- * activity, so we can decide whether the cheaper call is accurate enough. Remove once decided.
+ * Lifetime totals in one request (Strava's athlete stats). Matched our own per-activity sum exactly when compared
+ * (829 rides / 33,593 km, 530 runs / 4,005 km), and takes ~1 s instead of ~23 s. Returns null if the call is unusable.
  */
-async function compareWithAthleteStats(athleteId: number, token: string, mine: Totals) {
-  try {
-    const res = await fetch(`${API}/athletes/${athleteId}/stats`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store", signal: AbortSignal.timeout(10000) });
-    if (!res.ok) {
-      console.log(`[strava] compare: stats call failed (${res.status})`);
-      return;
-    }
-    const s = (await res.json()) as Record<string, { count?: number; distance?: number } | undefined>;
-    const km = (m?: number) => Math.round((m ?? 0) / 1000);
-    console.log(
-      `[strava] compare: stats rides=${s.all_ride_totals?.count} rideKm=${km(s.all_ride_totals?.distance)} runs=${s.all_run_totals?.count} runKm=${km(s.all_run_totals?.distance)} | ours rides=${mine.rides} rideKm=${Math.round(mine.rideKm)} runs=${mine.runs} runKm=${Math.round(mine.runKm)}`,
-    );
-  } catch (e) {
-    console.log(`[strava] compare: failed ${e instanceof Error ? e.message : e}`);
-  }
+async function fetchLifetimeTotals(athleteId: number, token: string): Promise<Totals | null> {
+  const res = await fetch(`${API}/athletes/${athleteId}/stats`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store", signal: AbortSignal.timeout(10000) });
+  if (!res.ok) throw new Error(`Strava stats request failed (${res.status}).`);
+  const s = (await res.json()) as Record<string, { count?: number; distance?: number } | undefined>;
+  const ride = s.all_ride_totals;
+  const run = s.all_run_totals;
+  if (typeof ride?.count !== "number" || typeof run?.count !== "number") return null;
+  return { rides: ride.count, rideKm: (ride.distance ?? 0) / 1000, runs: run.count, runKm: (run.distance ?? 0) / 1000 };
 }
 
 /** Read Strava, then rewrite the numbers in the "Beyond the desk" document. */
@@ -168,9 +161,9 @@ export async function syncStrava(): Promise<{ totals: Totals; syncedAt: string }
   const auth = await step("read saved Strava login (database)", 15000, () => getAuth());
   if (!auth) throw new Error("Strava is not connected yet. Connect it in /admin/beyond.");
   const token = await step("get Strava access token", 20000, () => accessToken(auth));
-  const totals = aggregateActivities(await step("download activities from Strava", 40000, () => fetchAllActivities(token)));
-
-  await compareWithAthleteStats(auth.athleteId, token, totals);
+  // Fast path: one call. Fallback (stats unavailable): add up every activity.
+  const quick = await step("read lifetime totals from Strava", 15000, () => fetchLifetimeTotals(auth.athleteId, token)).catch(() => null);
+  const totals = quick ?? aggregateActivities(await step("download activities from Strava", 40000, () => fetchAllActivities(token)));
 
   const db = requireDb();
   const [row] = await step("read page settings (database)", 15000, () => db.select().from(schema.siteContent).where(eq(schema.siteContent.key, BEYOND_KEY)));

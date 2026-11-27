@@ -353,6 +353,17 @@ export const seedProjects: Project[] = [
     status: "live",
     featuredOnCv: true,
   }),
+  proj(8, {
+    slug: "achelon",
+    name: "Achelon",
+    url: "https://achelon.khaw.cc",
+    category: "Endurance & Sports",
+    tagline: "Invite-only private network for endurance clubs: member directory, events and a shared calendar.",
+    description: "Every profile field has its own audience, events have sign-ups with an automatic waitlist, and a private calendar link keeps it all in your own calendar.",
+    techStack: ["Next.js"],
+    status: "live",
+    featuredOnCv: false,
+  }),
 ];
 
 export const seedParts: BookPart[] = [

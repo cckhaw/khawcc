@@ -61,7 +61,6 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
   const [inView, setInView] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const svg = useRef<SVGSVGElement>(null);
-  const list = useRef<HTMLUListElement>(null);
   const vbRef = useRef<VB>(REGIONS[0].vb);
 
   const tags = useMemo(() => Array.from(new Set(items.map((i) => i.tag).filter(Boolean))), [items]);
@@ -109,15 +108,6 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
     return () => cancelAnimationFrame(raf);
   }, [region, reduced]);
 
-  // Keep the selected row visible inside the list (scrolls the list only, never the page).
-  useEffect(() => {
-    const ul = list.current;
-    const row = ul?.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (!ul || !row) return;
-    const top = row.offsetTop - ul.offsetTop;
-    if (top < ul.scrollTop || top + row.offsetHeight > ul.scrollTop + ul.clientHeight) ul.scrollTo({ top: top - 12, behavior: reduced ? "auto" : "smooth" });
-  }, [selected, reduced]);
-
   if (!items.length) return null;
 
   function choose(i: number) {
@@ -129,6 +119,12 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
       const r = REGIONS.slice(1).find(({ vb }) => p.x > vb[0] && p.x < vb[0] + vb[2] && p.y > vb[1] && p.y < vb[1] + vb[3]);
       setRegion(r ? r.key : "all");
     }
+  }
+  /** From the list under the map: select it, and bring the map back into view if it has scrolled away. */
+  function pick(i: number) {
+    choose(i);
+    const r = wrap.current?.getBoundingClientRect();
+    if (r && (r.bottom < 80 || r.top > window.innerHeight - 80)) wrap.current?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
   }
   function step(dir: 1 | -1) {
     const order = items.map((_, i) => i).filter(match);
@@ -313,38 +309,12 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
                   );
                 })}
             </svg>
-
-            {/* selected project */}
-            <div
-              className="border-t p-4"
-              style={{ borderColor: "var(--atlas-line)", background: "var(--atlas-card)" }}
-              aria-live="polite"
-            >
-              <div className="flex items-center gap-2 text-xs" style={{ color: "var(--atlas-soft)" }}>
-                <span className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: sel.current ? "var(--accent)" : "var(--apac-pin)", color: sel.current ? "var(--bg)" : "#fff" }}>
-                  {labelFor(selected)}
-                </span>
-                <span>{[sel.place, sel.tag].filter(Boolean).join(" · ")}</span>
-                {sel.current && <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-bg">NOW</span>}
-              </div>
-              <p key={selected} className="mt-2 text-[0.92rem] leading-snug" style={{ animation: reduced ? undefined : "route-card-in .35s ease-out backwards" }}>
-                {sel.text}
-              </p>
-              <div className="mt-3 flex gap-2">
-                <button type="button" className="chip !px-3 !py-1" onClick={() => step(-1)} aria-label="Previous project">
-                  ←
-                </button>
-                <button type="button" className="chip !px-3 !py-1" onClick={() => step(1)} aria-label="Next project">
-                  →
-                </button>
-              </div>
-            </div>
           </div>
 
-          {/* ---------------- stats + list ---------------- */}
-          <div>
+          {/* ---------------- stats + selected project ---------------- */}
+          <div className="flex flex-col gap-5">
             {doc.stats.length > 0 && (
-              <ul className="mb-5 grid gap-3 text-center" style={{ gridTemplateColumns: `repeat(${doc.stats.length}, minmax(0, 1fr))` }}>
+              <ul className="grid gap-3 text-center" style={{ gridTemplateColumns: `repeat(${doc.stats.length}, minmax(0, 1fr))` }}>
                 {doc.stats.map((s) => (
                   <li key={s.label} className="rounded-2xl border px-2 py-4" style={{ borderColor: "var(--atlas-line)", background: "var(--card)" }}>
                     <p className="font-display text-2xl font-semibold leading-none text-accent sm:text-3xl">
@@ -357,23 +327,51 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
                 ))}
               </ul>
             )}
-            <ul ref={list} className="relative max-h-[30rem] space-y-1 overflow-y-auto pr-1 [scrollbar-width:thin]" style={{ scrollbarColor: "var(--line-strong) transparent" }}>
-              {items.map((it, i) => (
-                <li key={it.id} style={{ opacity: match(i) ? 1 : 0.35, transition: "opacity .3s" }}>
-                  <button type="button" className="row" aria-pressed={i === selected} onClick={() => choose(i)}>
-                    <span className="w-5 shrink-0 font-bold" style={{ color: it.current ? "var(--accent)" : "var(--fg)" }}>
-                      {labelFor(i)}
-                    </span>
-                    <span className="min-w-0" style={{ color: "var(--atlas-ink)" }}>
-                      {it.text}
-                      {it.current && <span className="ml-2 inline-block rounded-full bg-accent px-2 py-0.5 align-middle text-[10px] font-bold text-bg">NOW</span>}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {/* selected project */}
+            <div
+              className="order-first rounded-3xl border p-5 lg:order-none"
+              style={{ borderColor: "var(--atlas-line)", background: "var(--atlas-card)" }}
+              aria-live="polite"
+            >
+              <div className="flex items-center gap-2 text-xs" style={{ color: "var(--atlas-soft)" }}>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: sel.current ? "var(--accent)" : "var(--apac-pin)", color: sel.current ? "var(--bg)" : "#fff" }}>
+                  {labelFor(selected)}
+                </span>
+                <span>{[sel.place, sel.tag].filter(Boolean).join(" · ")}</span>
+                {sel.current && <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-bg">NOW</span>}
+              </div>
+              <p key={selected} className="mt-3 text-[0.95rem] leading-snug lg:text-lg" style={{ animation: reduced ? undefined : "route-card-in .35s ease-out backwards" }}>
+                {sel.text}
+              </p>
+              <div className="mt-3 flex gap-2">
+                <button type="button" className="chip !px-3 !py-1" onClick={() => step(-1)} aria-label="Previous project">
+                  ←
+                </button>
+                <button type="button" className="chip !px-3 !py-1" onClick={() => step(1)} aria-label="Next project">
+                  →
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* all projects, full width so nothing needs an inner scrollbar */}
+        <ul className="mt-8 space-y-1 lg:columns-2 lg:gap-x-10">
+          {items.map((it, i) => (
+            <li key={it.id} className="break-inside-avoid" style={{ opacity: match(i) ? 1 : 0.35, transition: "opacity .3s" }}>
+              <button type="button" className="row" aria-pressed={i === selected} onClick={() => pick(i)}>
+                <span className="w-5 shrink-0 font-bold" style={{ color: it.current ? "var(--accent)" : "var(--fg)" }}>
+                  {labelFor(i)}
+                </span>
+                <span className="min-w-0" style={{ color: "var(--atlas-ink)" }}>
+                  {it.text}
+                  {it.current && <span className="ml-2 inline-block rounded-full bg-accent px-2 py-0.5 align-middle text-[10px] font-bold text-bg">NOW</span>}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+
       </div>
       {/* viewBox attribute is driven imperatively above; MAP_H is only used to document the full extent */}
       <span hidden data-extent={`${MAP_W}x${MAP_H}`} data-dur={dur} />

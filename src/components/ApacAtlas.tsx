@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dots from "@/data/apac-dots.json";
-import { labelFor, layoutPins, MAP_H, MAP_W, type ApacDoc } from "@/lib/apac";
+import { headlineOf, labelFor, layoutPins, MAP_H, MAP_W, type ApacDoc } from "@/lib/apac";
 import { setMotionOff, useReducedMotion } from "@/lib/use-reduced-motion";
 import { PinShape } from "./ApacMap";
 import { CountUp } from "./CountUp";
@@ -267,7 +267,7 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
                       role="button"
                       tabIndex={0}
                       aria-pressed={i === selected}
-                      aria-label={`${labelFor(i)}: ${it.text}`}
+                      aria-label={`${labelFor(i)}: ${headlineOf(it.text)}`}
                       onClick={() => choose(i)}
                       onKeyDown={(e) => (e.key === "Enter" || e.key === " " ? (e.preventDefault(), choose(i)) : undefined)}
                       style={{
@@ -278,7 +278,7 @@ export function ApacAtlas({ doc }: { doc: ApacDoc }) {
                       }}
                     >
                       <g style={{ transform: `scale(${z})`, transition: reduced ? "none" : "transform .95s ease" }}>
-                        <title>{`${labelFor(i)}: ${it.text}`}</title>
+                        <title>{`${labelFor(i)}: ${headlineOf(it.text)}`}</title>
                         {live && !reduced && (
                           <>
                             {[0, 1.2].map((dl) => (

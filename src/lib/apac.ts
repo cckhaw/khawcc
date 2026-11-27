@@ -35,7 +35,7 @@ export function sanitizeApacDoc(input: unknown): ApacDoc {
   const r = (input && typeof input === "object" ? input : {}) as Record<string, unknown>;
   const items: ApacItem[] = (Array.isArray(r.items) ? r.items : []).slice(0, 60).flatMap((raw, i) => {
     const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
-    const text = str(o.text, 400);
+    const text = str(o.text, 700);
     if (!text) return [];
     return [
       {
@@ -97,3 +97,9 @@ export function layoutPins(items: { x: number; y: number }[], scale = PIN_SCALE)
   }
   return t.map((p) => ({ x: Math.round(p.x * 10) / 10, y: Math.round(p.y * 10) / 10 }));
 }
+
+/** First sentence of a project description: the one-line version used in the poster legend, tooltips and aria labels. */
+export const headlineOf = (text: string): string => {
+  const i = text.search(/\.\s/);
+  return i > 0 ? text.slice(0, i) : text;
+};

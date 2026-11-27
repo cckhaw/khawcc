@@ -136,7 +136,7 @@ export function ApacMapEditor({ initial }: { initial: ApacDoc }) {
                     className="field min-h-[3.5rem] flex-1 text-[14px]"
                     aria-label={`Project ${labels[i]} description`}
                     value={it.text}
-                    maxLength={400}
+                    maxLength={700}
                     onChange={(e) => setItem(i, { text: e.target.value })}
                     placeholder="What you did, for whom…"
                   />

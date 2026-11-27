@@ -3,7 +3,7 @@
 import { useState } from "react";
 import map from "@/data/apac-map.json";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
-import { labelFor, layoutPins, MAP_H, MAP_W, PIN_SCALE, type ApacDoc, type ApacItem } from "@/lib/apac";
+import { headlineOf, labelFor, layoutPins, MAP_H, MAP_W, PIN_SCALE, type ApacDoc, type ApacItem } from "@/lib/apac";
 
 export const PIN_PATH = "M0 0C-6 -9 -13 -14 -13 -22a13 13 0 1 1 26 0C13 -14 6 -9 0 0Z";
 export const MAP_LAND = map.land;
@@ -83,12 +83,12 @@ function Pins({
             role={onSelect ? "button" : undefined}
             tabIndex={onSelect ? 0 : undefined}
             aria-pressed={onSelect ? selected === i : undefined}
-            aria-label={`${label}: ${p.text}`}
+            aria-label={`${label}: ${headlineOf(p.text)}`}
             style={onSelect ? { cursor: "pointer", outline: "none" } : undefined}
             onClick={onSelect ? () => onSelect(i) : undefined}
             onKeyDown={onSelect ? (e) => (e.key === "Enter" || e.key === " " ? (e.preventDefault(), onSelect(i)) : undefined) : undefined}
           >
-            <title>{`${label}: ${p.text}`}</title>
+            <title>{`${label}: ${headlineOf(p.text)}`}</title>
             {on && (
               <>
                 {/* Pulse and breathing use SMIL (<animate>), which iPhone Safari runs reliably.
@@ -163,7 +163,7 @@ function Legend({ items, selected, onSelect, compact = false }: { items: ApacIte
               {labelFor(i)}
             </span>
             <span className="min-w-0" style={{ color: "var(--apac-ink)" }}>
-              {p.text}
+              {headlineOf(p.text)}
               {p.current && (
                 <span className="ml-2 inline-block rounded-full px-2 py-0.5 align-middle text-[10px] font-semibold" style={{ background: "var(--apac-hot)", color: "#fff" }}>
                   NOW
